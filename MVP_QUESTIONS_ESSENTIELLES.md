@@ -1,96 +1,102 @@
-## MVP - Questions essentielles (a completer pour la demo)
+## MVP - Questions simples (pour la demo)
 
-Objectif: en 4-5 jours, repondre a ces questions pour que le projet soit presentable, coherent et testable.
-
----
-
-## 1) Demarche du MVP (1 parcours utilisateur)
-1. Quel est le seul utilisateur du MVP pour la demo (inspecteur, responsable, superviseur, mineur, etc.)?
-2. Decrire le parcours complet en 5 etapes max (ex: scan ID -> collecte capteur -> detection -> alerte -> preuve/rapport).
-3. Quel est l'element qui prouve que “ca marche” au jury (carte geofence, timeline, compteur alertes, export, etc.)?
+Objectif : en 4-5 jours, répondre à ces questions pour que le projet soit clair, testable et facile à montrer au jury.
 
 ---
 
-## 2) Fraude et risque: definition non ambigu"
-4. Definition exacte du mot “fraude” dans votre MVP (1 phrase).
-5. Liste des types d'evenements que vous allez gerer (max 2 pour le MVP).
-6. Pour chaque evenement: quelle regle declenche (regle simple) + quel seuil (valeur) + quelle duree minimale (minutes/secondes)?
-7. Qu'est-ce qui marque un evenement comme “suspect” vs “confirmee” (meme si la confirmation est manuelle en demo)?
+## 1) Le parcours du MVP (1 utilisateur)
+1. Qui utilise le système pendant la démo ? (inspecteur, responsable, superviseur, etc.)
+2. Décrivez le chemin complet en 5 étapes max (ex : scanner l'ID -> capteurs -> détection -> alerte -> preuve/rapport).
+3. Qu'est-ce qui prouve que “ça marche” ? (ex : liste des alertes, chronologie, export, carte simple)
 
 ---
 
-## 3) Geofencing (si vous utilisez le GPS)
-8. Les zones interdites sont definies comment (liste de points, cercle rayon, ou polygone)?
-9. Quelle est la methode de test pour la demo (ex: faire entrer/sortir le collier depuis 2 points GPS predefinis)?
-10. Quelle marge GPS acceptez-vous pour eviter les faux positifs (ex: 20-50m selon le materiel)?
-11. Combien de temps une personne doit rester dans la zone pour declencher une alerte (ex: 10s, 30s, 2min)?
+## 2) Fraude / risque : définition facile
+4. Dans votre projet, c'est quoi “fraude” ? (une phrase)
+5. Quels événements vous allez gérer ? (max 2 événements pour le MVP)
+6. Pour chaque événement, donnez la règle simple :
+   - quoi on regarde (capteur/zone)
+   - quelle valeur déclenche (ex : “> X”, “dans la zone depuis Y secondes”)
+   - combien de temps avant d'alerter
+7. Un événement peut être “suspect” puis “confirmé” : comment vous passez de l’un à l’autre ?
 
 ---
 
-## 4) Capteurs: minimum viable
-12. Capteurs retenus (liste courte) et pourquoi (lien direct avec vos 2 evenements maximum).
-13. Quelles mesures sont en entree ML (si ML) et lesquelles sont “regles”?
-14. Comment vous allez simuler les donnees pour la demo (fichier CSV, script, ou dataset artificiel)?
-15. Frequence d'envoi des donnees (toutes les X secondes/minutes) et taille des messages (pour eviter saturation).
+## 3) Zone interdite (si vous utilisez le GPS)
+8. Comment vous définissez la zone interdite ? (point/cercle/rayon ou coordonnées GPS)
+9. Comment vous testez pendant la démo ? (ex : faire entrer/sortir à partir de 2 endroits GPS)
+10. Si le GPS se trompe un peu, vous acceptez quelle “marge” ? (ex : 20-50m selon votre matériel)
+11. Combien de temps la personne doit rester dans la zone pour déclencher une alerte ? (ex : 10s / 30s / 2min)
 
 ---
 
-## 5) ML (si vous voulez vraiment en montrer)
-16. Quel modele ML voulez-vous montrer (anomalie, classification, detection de choc, prediction simple)?
-17. Taille cible du modele: (option) modele tres petit / inference rapide sur Raspberry Pi.
-18. Les donnees ML viennent d'ou (capteurs reels, simulation, dataset public, ou enregistrement sur site)?
-19. Comment vous evaluerez rapidement le modele en demo (precision/recall simplifie, ou “taux de detection” sur 10 essais)?
-20. Decrivez le pipeline ML en 3 lignes (input -> inference -> score -> seuil -> evenement).
+## 4) Capteurs : le minimum
+12. Quels capteurs vous gardez ? (liste courte) Et pourquoi ? (liens directs avec vos 2 événements)
+13. Quelles données servent pour la détection “automatique” (règles) ?
+14. Comment vous allez simuler des données si vous n'avez pas de capteurs au début ? (fichier, script, valeurs test)
+15. À quelle fréquence le collier envoie les données ? (toutes les X secondes/minutes)
 
 ---
 
-## 6) Tra"cabilite / preuve d'integrite (sans bloquer sur la blockchain)
-21. Qu'est-ce que vous stockez exactement pour chaque evenement (champ de base minimum)?
-22. Quel mecanisme d'immutabilite utilisez-vous pour le MVP (hash chain / signature / log append-only)?
-23. Qui peut acceder au journal (admin/inspecteur) et comment l'export se fait (CSV/PDF)?
-24. Comment prouver au jury que l'historique n'a pas ete modifie (afficher prev_hash + hash actuel + horodatage)?
+## 5) ML / IA (optionnel pour la démo)
+16. Voulez-vous montrer une IA dans la démo ? (oui/non)
+17. Si oui : quelle IA vous montrez ? (ex : repérer un choc, reconnaître un type d'événement, etc.)
+18. D'où viennent les données IA ? (capteurs réels, simulation, données déjà existantes)
+19. Comment vous prouvez que l'IA marche, rapidement ? (ex : nombre de réussites sur 10 tests)
+20. Décrivez le fonctionnement IA en 3 lignes simples :
+   - entrée (données)
+   - résultat (score/score)
+   - décision (si score > X alors alerte)
 
 ---
 
-## 7) Securite & anti-usurpation (minimum raisonnable)
-25. Comment identifiez-vous le mineur (ID unique, QR collier, badge)?
-26. Comment eviter qu'on “copie” un ID (secret/cle cote serveur, challenge simple, etc.)?
-27. Comment vous gerez le cas “pas de reseau” (cache local + envoi plus tard, ou alerte locale)?
-28. Quelle donnee doit rester privee (ecraser/masquer lors du dashboard)?
+## 6) Traçabilité / preuve que personne ne triche (sans se bloquer sur la blockchain)
+21. Pour chaque alerte, vous stockez quoi exactement ? (liste de 4-6 infos max)
+22. Comment vous garantissez que l'historique ne change pas facilement ?
+   (ex : “journal ajouté et signé”, ou “hash chain” si vous connaissez)
+23. Qui voit le journal ? Et comment vous exportez pour le jury (CSV/PDF) ?
+24. Comment vous montrez au jury que l’historique est “intègre” ? (ex : afficher un résumé + horodatage)
 
 ---
 
-## 8) Dashboard et reporting pour le jury
-29. Quelles 4 vues allez-vous montrer (ex: liste evenements, details alerte, carte geofence simplifiee, export)?
-30. Quels indicateurs de succes affichez-vous (nb alertes, delai detection, faux positifs estimés)?
-31. Quels sont les messages d'alerte clairs (ex: “Zone interdite detectee - suspect” + timestamp + device ID)?
+## 7) Sécurité : éviter la copie d’un ID
+25. Comment vous identifiez le mineur ? (ID, QR du collier, badge)
+26. Comment empêcher qu’une autre personne copie l’ID ? (une méthode simple côté serveur)
+27. Et si pas de réseau ? (stockage local + envoi plus tard, ou alerte sur place)
+28. Quelles données doivent rester privées ? (ne pas afficher des infos personnelles)
 
 ---
 
-## 9) Validation terrain (meme si c'est une simulation au debut)
-32. Combien d'essais de demo vous faites avant le jour du concours (ex: 10 scenarios)?
-33. Pour chaque scenario: resultat attendu vs resultat observe.
-34. Quelles erreurs frequentes voulez-vous prevenir (GPS instable, manque reseau, capteur bruit, delai upload)?
+## 8) Ce que vous montrez sur le tableau de bord (jury)
+29. Quelles 4 vues allez-vous afficher ? (ex : liste alertes, détails, carte simple, export)
+30. Quels indicateurs vous donnez au jury ? (nb alertes, temps avant alerte, faux positifs estimés)
+31. Quel message d’alerte clair vous affichez ? (ex : “Zone interdite détectée - suspect” + date/heure + ID)
+
+---
+
+## 9) Validation terrain (même avec simulation au début)
+32. Combien de scénarios testez-vous avant le concours ? (ex : 10)
+33. Pour chaque scénario : attendu vs résultat réel
+34. Quelles erreurs fréquentes vous devez éviter ? (GPS instable, pas de réseau, capteurs bruités)
 
 ---
 
 ## 10) Plan 4-5 jours (check rapide)
-35. Jour 1: hardware/test capteur + message JSON format + endpoint serveur.
-36. Jour 2: regles detection + geofencing + creation evenement + hash chain.
-37. Jour 3: dashboard + vue chronologie + export.
-38. Jour 4: integrer simulation ML (optionnel) ou ameliorer seuil/anti-faux positif + securite ID.
-39. Jour 5: polissage demo + video/test final + documentation simple.
+35. Jour 1 : capteurs (ou simulation) + format données (JSON) + endpoint serveur
+36. Jour 2 : règles de détection (zone + déclenchement) + création d’alerte + preuve d’intégrité
+37. Jour 3 : dashboard + chronologie + export
+38. Jour 4 : ajouter (optionnel) IA ou améliorer la détection pour réduire les erreurs
+39. Jour 5 : préparer la démo finale + tests + explications simples
 
 ---
 
-## A completer (zone de saisie equipe)
-- Evenement 1:
-- Evenement 2:
-- Regle even. 1 (seuil + duree):
-- Regle even. 2 (seuil + duree):
-- Zone interdite (definition + parametres):
-- Capteurs retenus:
-- Traçabilite (hash chain/signe):
-- ML (oui/non + modele + seuil):
-- Scenario demo final (5 etapes):
-
+## À compléter (zone de saisie équipe)
+- Événement 1 :
+- Événement 2 :
+- Règle évènement 1 (valeur + durée) :
+- Règle évènement 2 (valeur + durée) :
+- Zone interdite (comment vous la définissez) :
+- Capteurs retenus :
+- Traçabilité (méthode simple) :
+- IA (oui/non + idée + seuil si besoin) :
+- Scénario démo final (5 étapes) :
