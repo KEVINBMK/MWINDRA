@@ -20,7 +20,7 @@ Note: pour enregistrer une case cochée dans le repo, il faut editer le fichier 
   - [ ] Non / instable
 
 - **GPS (cocher 1)**
-  - [ ] Oui
+  - [x] Oui
   - [ ] Non
 
 - **Alertes MVP (cocher ce qu'on fait)**
