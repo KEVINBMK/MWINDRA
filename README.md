@@ -8,7 +8,11 @@ Ce repo contient nos documents de travail pour aligner l'equipe et livrer un MVP
 - `MINE_TECH_MVP_QUESTIONS.md` (questions generales)
 
 ### Decisions rapides (a cocher)
-Note: pour enregistrer une case cochée dans le repo, il faut editer le fichier et faire un commit (ou utiliser une Issue/PR).
+Note: dans un fichier `.md` du repo, les cases ne sont en general **pas cliquables** pour enregistrer. Pour cocher **directement sur GitHub**, utilisez une **Issue** :
+
+- **Nouvelle issue avec le modele "Decisions MVP"** : [Creer l'issue](https://github.com/KEVINBMK/MWINDRA/issues/new?template=decisions-mvp.md)
+
+Sinon, editez le fichier (icone crayon) puis commit.
 
 - **Utilisateur principal (cocher 1)**
   - [ ] Responsable securite
