@@ -9,6 +9,13 @@ Objectif demo: montrer qu'un bracelet envoie des donnees (radiation + SOS + posi
 - localise rapidement le travailleur
 - garde un historique exploitable (preuve / rapport)
 
+### Comment utiliser ce document (equipe)
+
+1. **Lire les sections 0 et 1** pour fixer le perimetre : utilisateur demo, internet, GPS, alertes, seuils, confidentialite.
+2. **Trancher les choix** : cocher dans l’[issue « Decisions MVP »](https://github.com/KEVINBMK/MWINDRA/issues/new?template=decisions-mvp.md) (cases interactives), ou reporter les coches a la main dans ce fichier puis commit.
+3. **Sections 2 a 7** : scenario de demo, architecture, donnees JSON, API, ecrans — servent de **cahier des charges** pour coder backend + dashboard.
+4. **Sections 8 a 13** : options (notifications, hash-chain), planning 4–5 jours, tests, definition of done — a suivre pour livrer a temps.
+
 ---
 
 ## 0) Regles du MVP (pour ne pas se perdre)

@@ -1,37 +1,43 @@
 ## MWINDRA — Système intelligent de sécurité minière (MVP)
 
-Ce repo contient nos documents de travail pour aligner l'equipe et livrer un MVP.
+Dépôt de **cadrage et de spécification** pour le MVP logiciel (bracelet → API → tableau de bord).
 
-### Documents
-- `SPEC_MVP_LOGICIEL_MWINDRA.md` (spec + decisions a cocher)
-- `MVP_QUESTIONS_ESSENTIELLES.md` (questions simples)
-- `MINE_TECH_MVP_QUESTIONS.md` (questions generales)
+---
 
-### Decisions rapides (a cocher)
-Note: dans un fichier `.md` du repo, les cases ne sont en general **pas cliquables** pour enregistrer. Pour cocher **directement sur GitHub**, utilisez une **Issue** :
+### Fichier principal
 
-- **Nouvelle issue avec le modele "Decisions MVP"** : [Creer l'issue](https://github.com/KEVINBMK/MWINDRA/issues/new?template=decisions-mvp.md)
+| Fichier | Rôle |
+|--------|------|
+| [`SPEC_MVP_LOGICIEL_MWINDRA.md`](SPEC_MVP_LOGICIEL_MWINDRA.md) | Spécification complète : questions d’accord, architecture, données, API, écrans, plan 4–5 jours, tests. |
 
-Sinon, editez le fichier (icone crayon) puis commit.
+---
 
-- **Utilisateur principal (cocher 1)**
-  - [ ] Responsable securite
-  - [ ] Superviseur terrain
-  - [ ] Inspecteur
+### Comment utiliser `SPEC_MVP_LOGICIEL_MWINDRA.md`
 
-- **Internet pendant la demo (cocher 1)**
-  - [ ] Oui, stable
-  - [ ] Non / instable
+1. **Ouvrir le fichier** (sur GitHub ou en local) et lire d’abord l’introduction + **« Comment utiliser ce document »** en haut.
+2. **Remplir / décider la section 1** (utilisateur demo, internet, GPS, alertes, seuils radiation, confidentialité). Sans ces choix, le développement part dans tous les sens.
+3. **Aligner l’équipe** : soit vous recopiez les décisions dans le fichier (édition + commit), soit vous utilisez l’issue ci-dessous pour **cocher** les options.
+4. **Développement** : les sections **2 à 7** décrivent ce qu’il faut coder (contrat JSON, endpoints, 3 pages du dashboard). Les sections **8 à 13** précisent les options et le calendrier.
+5. **Avant la présentation** : vérifier la **Definition of Done** (fin du fichier spec).
 
-- **GPS (cocher 1)**
-  - [x] Oui
-  - [ ] Non
+---
 
-- **Alertes MVP (cocher ce qu'on fait)**
-  - [ ] Radiation
-  - [ ] SOS
+### Décisions à cocher sur GitHub (cases interactives)
 
-- **Techno backend (cocher 1)**
-  - [ ] Python FastAPI
-  - [ ] Node.js Express
+Dans un fichier `.md` du dépôt, les cases ne s’enregistrent en général **pas** au clic. Pour travailler ensemble avec des **cases cliquables** :
 
+- [Créer une issue « Décisions MVP »](https://github.com/KEVINBMK/MWINDRA/issues/new?template=decisions-mvp.md) → **Submit** → puis cocher dans la description de l’issue.
+
+Le modèle d’issue est dans [`.github/ISSUE_TEMPLATE/decisions-mvp.md`](.github/ISSUE_TEMPLATE/decisions-mvp.md).
+
+---
+
+### Structure du dépôt
+
+```
+MWINDRA/
+  README.md                          ← vous êtes ici
+  SPEC_MVP_LOGICIEL_MWINDRA.md       ← spec détaillée (référence)
+  .github/ISSUE_TEMPLATE/
+    decisions-mvp.md                 ← modèle d’issue (décisions)
+```
