@@ -15,6 +15,7 @@ Objectif demo: montrer qu'un bracelet envoie des donnees (radiation + SOS + posi
 2. **Trancher les choix** : cocher dans l’[issue « Decisions MVP »](https://github.com/KEVINBMK/MWINDRA/issues/new?template=decisions-mvp.md) (cases interactives), ou reporter les coches a la main dans ce fichier puis commit.
 3. **Sections 2 a 7** : scenario de demo, architecture, donnees JSON, API, ecrans — servent de **cahier des charges** pour coder backend + dashboard.
 4. **Sections 8 a 13** : options (notifications, hash-chain), planning 4–5 jours, tests, definition of done — a suivre pour livrer a temps.
+5. **Avant de coder** : parcourir [`DIAGRAMMES_MVP_PRE_DEV.md`](DIAGRAMMES_MVP_PRE_DEV.md) (sequences, contexte, etats, checklist).
 
 ---
 

@@ -10,6 +10,8 @@ Dépôt de **cadrage et de spécification** pour le MVP logiciel (bracelet → A
 |--------|------|
 | [`SPEC_MVP_LOGICIEL_MWINDRA.md`](SPEC_MVP_LOGICIEL_MWINDRA.md) | Spécification complète : questions d’accord, architecture, données, API, écrans, plan 4–5 jours, tests. |
 | [`EXPLICATION_SIMPLE_SPEC_MVP.md`](EXPLICATION_SIMPLE_SPEC_MVP.md) | Version simplifiée de la spec (lecture rapide pour toute l’équipe). |
+| [`ORGANIGRAMME_UTILISATEURS.md`](ORGANIGRAMME_UTILISATEURS.md) | Organigramme des rôles (terrain vs plateforme SaaS). |
+| [`DIAGRAMMES_MVP_PRE_DEV.md`](DIAGRAMMES_MVP_PRE_DEV.md) | Diagrammes de séquences, contexte, états, ER — avant développement. |
 
 ---
 
@@ -40,6 +42,8 @@ MWINDRA/
   README.md                          ← vous êtes ici
   SPEC_MVP_LOGICIEL_MWINDRA.md       ← spec détaillée (référence)
   EXPLICATION_SIMPLE_SPEC_MVP.md     ← résumé simple
+  ORGANIGRAMME_UTILISATEURS.md       ← rôles utilisateurs
+  DIAGRAMMES_MVP_PRE_DEV.md          ← séquences + états + ER
   .github/ISSUE_TEMPLATE/
     decisions-mvp.md                 ← modèle d’issue (décisions)
 ```
