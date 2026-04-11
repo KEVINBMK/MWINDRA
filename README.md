@@ -9,6 +9,7 @@ Dépôt de **cadrage et de spécification** pour le MVP logiciel (bracelet → A
 | Fichier | Rôle |
 |--------|------|
 | [`SPEC_MVP_LOGICIEL_MWINDRA.md`](SPEC_MVP_LOGICIEL_MWINDRA.md) | Spécification complète : questions d’accord, architecture, données, API, écrans, plan 4–5 jours, tests. |
+| [`EXPLICATION_SIMPLE_SPEC_MVP.md`](EXPLICATION_SIMPLE_SPEC_MVP.md) | Version simplifiée de la spec (lecture rapide pour toute l’équipe). |
 
 ---
 
@@ -38,6 +39,7 @@ Le modèle d’issue est dans [`.github/ISSUE_TEMPLATE/decisions-mvp.md`](.githu
 MWINDRA/
   README.md                          ← vous êtes ici
   SPEC_MVP_LOGICIEL_MWINDRA.md       ← spec détaillée (référence)
+  EXPLICATION_SIMPLE_SPEC_MVP.md     ← résumé simple
   .github/ISSUE_TEMPLATE/
     decisions-mvp.md                 ← modèle d’issue (décisions)
 ```
