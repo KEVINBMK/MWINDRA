@@ -9,7 +9,9 @@
     * { box-sizing: border-box; }
     body { font-family: system-ui, sans-serif; margin: 0; min-height: 100vh; background: var(--bg); color: #e2e8f0; padding: 1rem; }
     h1 { font-size: 1.1rem; margin: 0 0 0.5rem; }
-    .card { background: var(--card); border-radius: 12px; padding: 1rem; margin-bottom: 1rem; }
+    .sub { font-size: 0.8rem; color: #64748b; margin-bottom: 1rem; }
+    .card { background: var(--card); border-radius: 12px; padding: 1rem; margin-bottom: 1rem; border: 1px solid #1e293b; }
+    .card h2 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; margin: 0 0 0.75rem; }
     .led { width: 100%; height: 72px; border-radius: 12px; margin: 0.75rem 0; transition: background 0.2s; display: flex; align-items: center; justify-content: center; font-weight: 700; }
     .led.green { background: var(--ok); color: #052e16; }
     .led.yellow { background: #eab308; color: #422006; }
@@ -17,34 +19,54 @@
     label { display: block; margin: 0.5rem 0 0.25rem; font-size: 0.85rem; color: #94a3b8; }
     input[type="range"] { width: 100%; }
     .val { font-size: 1.5rem; font-variant-numeric: tabular-nums; }
-    button { width: 100%; padding: 1rem; margin-top: 0.5rem; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+    button { width: 100%; padding: 0.85rem; margin-top: 0.45rem; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 600; cursor: pointer; }
     .btn-send { background: #2563eb; color: #fff; }
     .btn-sos { background: var(--danger); color: #fff; }
+    .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; margin-top: 0.45rem; }
+    .btn-row button { margin-top: 0; font-size: 0.82rem; padding: 0.7rem; }
+    .btn-rand { background: #4f46e5; color: #fff; }
+    .btn-rand2 { background: #0d9488; color: #fff; }
+    .btn-rand3 { background: #b45309; color: #fff; }
+    .btn-full { grid-column: 1 / -1; }
     .msg { font-size: 0.85rem; margin-top: 0.5rem; min-height: 1.25rem; }
     .msg.ok { color: #4ade80; }
     .msg.err { color: #f87171; }
     input.text { width: 100%; padding: 0.5rem; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; }
     small { color: #64748b; }
+    a.back { color: #93c5fd; font-size: 0.85rem; }
   </style>
 </head>
 <body>
+  <a class="back" href="/">← Accueil démo</a>
   <h1>Bracelet — simulation</h1>
+  <p class="sub">Données fictives. Seuils démo : &lt;0,5 vert · 0,5–2 jaune · ≥2 rouge.</p>
+
   <div class="card">
     <div id="led" class="led green">VERT</div>
     <div class="val"><span id="num">0.20</span> <small>µSv/h</small></div>
     <label for="rad">Glisser pour simuler le débit (démo)</label>
     <input type="range" id="rad" min="0" max="500" value="20" step="1" />
-    <button type="button" class="btn-send" id="send">Envoyer la mesure</button>
+
+    <h2>Simulation aléatoire</h2>
+    <div class="btn-row">
+      <button type="button" class="btn-rand" id="randLevel" title="Tire un débit entre 0 et 5 µSv/h">Niveau aléatoire</button>
+      <button type="button" class="btn-rand2" id="randPic" title="Tire un débit entre 0,5 et 5 µSv/h">Pic aléatoire</button>
+      <button type="button" class="btn-rand3 btn-full" id="randSend" title="Tire, met à jour l'affichage et envoie au serveur">Envoyer mesure aléatoire</button>
+    </div>
+
+    <button type="button" class="btn-send" id="send">Envoyer la mesure (valeur affichée)</button>
     <button type="button" class="btn-sos" id="sos">SOS — Urgence</button>
     <div id="msg" class="msg"></div>
   </div>
+
   <div class="card">
     <label>ID bracelet</label>
     <input class="text" id="bid" value="BR-DEMO-01" />
     <label>Token API (démo)</label>
     <input class="text" id="token" value="demo-mwindra-2026" autocomplete="off" />
-    <p><small>Seuils : &lt;0,5 vert · 0,5–2 jaune · ≥2 rouge — <a href="/static/seuils-demo.txt" style="color:#93c5fd">détail</a></small></p>
+    <p><small><a href="/static/seuils-demo.txt" style="color:#93c5fd">Détail des seuils (fichier)</a></small></p>
   </div>
+
   <script>
     const SEUIL_V = 0.5, SEUIL_J = 2;
     const rad = document.getElementById('rad');
@@ -53,6 +75,16 @@
     const msg = document.getElementById('msg');
 
     function uSvFromSlider() { return parseInt(rad.value, 10) / 100; }
+
+    function setSliderFromUSv(uSv) {
+      const clamped = Math.max(0, Math.min(5, uSv));
+      rad.value = String(Math.round(clamped * 100));
+      refreshLed();
+    }
+
+    function randomUSv(min, max) {
+      return min + Math.random() * (max - min);
+    }
 
     function niveau(v) {
       if (v < SEUIL_V) return 'GREEN';
@@ -71,6 +103,18 @@
     rad.addEventListener('input', refreshLed);
     refreshLed();
 
+    document.getElementById('randLevel').addEventListener('click', () => {
+      msg.textContent = '';
+      msg.className = 'msg';
+      setSliderFromUSv(randomUSv(0, 5));
+    });
+
+    document.getElementById('randPic').addEventListener('click', () => {
+      msg.textContent = '';
+      msg.className = 'msg';
+      setSliderFromUSv(randomUSv(SEUIL_V, 5));
+    });
+
     async function postJson(path, body) {
       const token = document.getElementById('token').value.trim();
       const res = await fetch(path, {
@@ -88,21 +132,40 @@
       return data;
     }
 
+    async function sendRadiationValue(uSv) {
+      const bid = document.getElementById('bid').value.trim() || 'BR-DEMO-01';
+      await postJson('/api/events', {
+        braceletId: bid,
+        type: 'RADIATION',
+        radiationValue: uSv,
+        radiationUnit: 'uSv/h',
+        lat: -4.32 + (Math.random() - 0.5) * 0.02,
+        lng: 15.31 + (Math.random() - 0.5) * 0.02,
+      });
+    }
+
     document.getElementById('send').addEventListener('click', async () => {
       msg.textContent = '';
       msg.className = 'msg';
       const v = uSvFromSlider();
-      const bid = document.getElementById('bid').value.trim() || 'BR-DEMO-01';
       try {
-        await postJson('/api/events', {
-          braceletId: bid,
-          type: 'RADIATION',
-          radiationValue: v,
-          radiationUnit: 'uSv/h',
-          lat: -4.32,
-          lng: 15.31,
-        });
+        await sendRadiationValue(v);
         msg.textContent = 'Mesure envoyée ✓';
+        msg.className = 'msg ok';
+      } catch (e) {
+        msg.textContent = String(e.message);
+        msg.className = 'msg err';
+      }
+    });
+
+    document.getElementById('randSend').addEventListener('click', async () => {
+      msg.textContent = '';
+      msg.className = 'msg';
+      const v = randomUSv(0, 5);
+      setSliderFromUSv(v);
+      try {
+        await sendRadiationValue(v);
+        msg.textContent = 'Mesure aléatoire envoyée ✓ (' + v.toFixed(2) + ' µSv/h)';
         msg.className = 'msg ok';
       } catch (e) {
         msg.textContent = String(e.message);
