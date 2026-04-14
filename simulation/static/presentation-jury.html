@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#080c14" />
+  <title>MWINDRA — Présentation jury (scénarios visuels)</title>
+  <style>
+    :root {
+      --bg: #080c14;
+      --surface: #111827;
+      --border: #1e293b;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #3b82f6;
+      --ok: #22c55e;
+      --warn: #eab308;
+      --danger: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); font-family: system-ui, "Segoe UI", sans-serif; line-height: 1.45; }
+    .top {
+      position: sticky; top: 0; z-index: 20;
+      background: linear-gradient(180deg, rgba(8,12,20,0.98) 70%, transparent);
+      padding: 0.65rem 1rem 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .top-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+    .top a.back { color: #93c5fd; font-size: 0.8rem; text-decoration: none; }
+    .top h1 { font-size: 0.95rem; margin: 0; font-weight: 700; flex: 1; min-width: 12rem; }
+    .progress-wrap { flex: 2 1 200px; height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), #60a5fa); width: 0%; transition: width 0.25s ease; }
+    .counter { font-size: 0.75rem; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 5rem; text-align: right; }
+    main { max-width: 900px; margin: 0 auto; padding: 1rem 1rem 5.5rem; min-height: 60vh; }
+    .slide {
+      display: none;
+      animation: in 0.35s ease;
+    }
+    .slide.active { display: block; }
+    @keyframes in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .slide h2 { font-size: 1.25rem; margin: 0 0 0.75rem; letter-spacing: -0.02em; }
+    .slide .lead { color: var(--muted); font-size: 0.95rem; margin: 0 0 1rem; }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem; }
+    .pill { font-size: 0.65rem; padding: 0.2rem 0.5rem; border-radius: 999px; background: #1e3a5f; color: #93c5fd; font-weight: 600; }
+    .diagram-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.75rem;
+      margin: 1rem 0;
+      overflow: auto;
+      max-height: min(70vh, 520px);
+    }
+    .diagram-box svg { max-width: 100%; height: auto; }
+    .diagram-box .mmd-wait { color: var(--muted); font-size: 0.85rem; padding: 1rem; text-align: center; }
+    .seuils-viz { display: flex; gap: 0.5rem; align-items: flex-end; height: 100px; margin: 1rem 0; }
+    .seuils-viz .bar { flex: 1; border-radius: 8px 8px 0 0; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 0.35rem; font-size: 0.65rem; font-weight: 700; color: #0f172a; }
+    .seuils-viz .g { background: var(--ok); max-height: 35%; }
+    .seuils-viz .y { background: var(--warn); max-height: 55%; }
+    .seuils-viz .r { background: var(--danger); max-height: 100%; }
+    .live-grid { display: grid; gap: 0.65rem; margin-top: 1rem; }
+    @media (min-width: 520px) { .live-grid { grid-template-columns: 1fr 1fr; } }
+    a.tile {
+      display: block; padding: 1rem 1.1rem; background: #1e293b; border: 1px solid var(--border);
+      border-radius: 12px; color: var(--text); text-decoration: none; transition: border-color 0.15s;
+    }
+    a.tile:hover { border-color: var(--accent); }
+    a.tile strong { display: block; margin-bottom: 0.25rem; font-size: 1rem; }
+    a.tile span { font-size: 0.8rem; color: var(--muted); }
+    .nav-fixed {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 30;
+      background: rgba(8,12,20,0.92); backdrop-filter: blur(8px);
+      border-top: 1px solid var(--border); padding: 0.65rem 1rem;
+    }
+    .nav-inner { max-width: 900px; margin: 0 auto; display: flex; gap: 0.5rem; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+    .nav-fixed button {
+      font-size: 0.85rem; padding: 0.55rem 1rem; border-radius: 10px; border: 1px solid var(--border);
+      background: #1e293b; color: var(--text); cursor: pointer; font-weight: 600;
+    }
+    .nav-fixed button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .nav-fixed button.primary { background: var(--accent); border-color: #2563eb; color: #fff; }
+    .dots { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; flex: 1; }
+    .dots button {
+      width: 8px; height: 8px; border-radius: 50%; border: none; padding: 0; cursor: pointer;
+      background: #334155; transition: transform 0.15s, background 0.15s;
+    }
+    .dots button.on { background: var(--accent); transform: scale(1.15); }
+    kbd { font-size: 0.7rem; background: #1e293b; padding: 0.1rem 0.35rem; border-radius: 4px; border: 1px solid var(--border); }
+    ul.check { margin: 0.5rem 0 0; padding-left: 1.2rem; color: var(--muted); font-size: 0.9rem; }
+    ul.check li { margin: 0.35rem 0; }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <div class="top-inner">
+      <a class="back" href="/">← Accueil démo</a>
+      <h1>Présentation jury — scénarios MWINDRA</h1>
+      <div class="progress-wrap" aria-hidden="true"><div class="progress-bar" id="progress"></div></div>
+      <span class="counter" id="counter">1 / —</span>
+    </div>
+  </div>
+
+  <main id="main"></main>
+
+  <div class="nav-fixed">
+    <div class="nav-inner">
+      <button type="button" id="prev" aria-label="Scénario précédent">← Précédent</button>
+      <div class="dots" id="dots" aria-label="Aller au scénario"></div>
+      <button type="button" id="next" class="primary" aria-label="Scénario suivant">Suivant →</button>
+    </div>
+    <p style="max-width:900px;margin:0.4rem auto 0;font-size:0.7rem;color:var(--muted);text-align:center;">
+      Raccourcis : <kbd>←</kbd> <kbd>→</kbd> — Données 100 % fictives pour la démonstration.
+    </p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+  <script>
+    (function () {
+      const MERMAID_INIT = { startOnLoad: false, theme: 'dark', securityLevel: 'loose', fontFamily: 'system-ui, sans-serif' };
+
+      const slides = [
+        {
+          title: 'Bienvenue',
+          pills: ['MWINDRA', 'MVP', 'Jury'],
+          lead: 'Cette présentation enchaîne les **scénarios** du projet : acteurs, flux, alertes, supervision — avec des **schémas animés** (Mermaid) alignés sur la documentation `docs/`.',
+          html: '<p class="lead" style="margin-top:0">Ensuite, vous pourrez enchaîner avec la <strong>démo live</strong> sur deux téléphones (bracelet + superviseur) et la vue 3D.</p>',
+          diagram: null,
+        },
+        {
+          title: 'Pourquoi le visuel ?',
+          pills: ['Pédagogie', 'Alignement équipe'],
+          lead: 'Les documents Markdown restent la référence ; ici on **raconte le même fil** avec des diagrammes, pour que le jury **voie** les échanges bracelet → API → superviseur.',
+          html: '<ul class="check"><li>Aucune mesure réelle : seuils et valeurs **uniquement** pour la démo.</li><li>Même logique que la spec : <code>POST /api/events</code>, <code>GET /api/alerts</code>, <code>PATCH</code> statut.</li></ul>',
+          diagram: null,
+        },
+        {
+          title: 'Qui utilise le système ?',
+          pills: ['Organigramme', 'docs/ORGANIGRAMME…'],
+          lead: 'Chaîne opérationnelle et acteurs transverses (RH, IT) — version synthétique du document organigramme.',
+          html: '',
+          diagram: `flowchart TB
+            subgraph S["Niveau stratégique"]
+              DIR["Direction / QHSE"]
+            end
+            subgraph P["Plateforme SaaS"]
+              RS["Resp. sécurité"]
+              SUP["Superviseur zone"]
+              INS["Inspecteur"]
+            end
+            subgraph T["Terrain"]
+              MIN["Porteur bracelet"]
+            end
+            DIR --> RS
+            RS --> SUP
+            SUP --> MIN
+            INS -.->|"consultation"| RS`,
+        },
+        {
+          title: 'Vue d’ensemble — contexte',
+          pills: ['Architecture', 'F1–F7'],
+          lead: 'Le porteur est équipé ; la plateforme centralise les événements ; le superviseur agit via le navigateur.',
+          html: '',
+          diagram: `flowchart LR
+            subgraph Terrain["Terrain"]
+              P[Porteur]
+              B[Bracelet IoT]
+            end
+            subgraph SaaS["MWINDRA"]
+              API[API REST]
+              DB[(Données)]
+              UI[Dashboard]
+            end
+            S[Superviseur]
+            P --> B
+            B -->|"HTTPS JSON"| API
+            API --> DB
+            S --> UI
+            UI -->|"HTTPS"| API`,
+        },
+        {
+          title: 'Scénario 1 — Mesure radiation (normal)',
+          pills: ['F1', 'POST /api/events'],
+          lead: 'Envoi périodique (ou à la demande) : le bracelet transmet la mesure ; l’API valide et enregistre.',
+          html: '',
+          diagram: `sequenceDiagram
+            participant Porteur
+            participant Bracelet as Bracelet
+            participant API as API MWINDRA
+            participant DB as Stockage
+            Porteur->>Bracelet: Porte le dispositif
+            Bracelet->>Bracelet: Mesure / niveau
+            Bracelet->>API: POST /api/events + Bearer
+            API->>API: Validation
+            API->>DB: Enregistrer événement
+            DB-->>API: OK
+            API-->>Bracelet: 201 Created`,
+        },
+        {
+          title: 'Seuils démo (µSv/h)',
+          pills: ['Couleurs', 'static/seuils-demo.txt'],
+          lead: 'Pour le jury : **vert** &lt; 0,5 — **jaune** 0,5 à 2 — **rouge** ≥ 2. Ces bornes ne remplacent pas la réglementation ni un appareil étalonné.',
+          html: `<div class="seuils-viz" aria-hidden="true">
+            <div class="bar g">Vert</div>
+            <div class="bar y">Jaune</div>
+            <div class="bar r">Rouge</div>
+          </div><p class="lead" style="font-size:0.85rem">Sur la démo bracelet, un curseur ou un envoi aléatoire fait changer le niveau ; le superviseur voit les alertes quand le niveau passe en zone critique (selon règles API).</p>`,
+          diagram: null,
+        },
+        {
+          title: 'Scénario 2 — Urgence SOS',
+          pills: ['F2', 'SOS'],
+          lead: 'Le porteur déclenche le SOS ; l’événement est marqué côté plateforme ; les alertes remontent au tableau de bord.',
+          html: '',
+          diagram: `sequenceDiagram
+            participant Porteur
+            participant Bracelet as Bracelet
+            participant API as API MWINDRA
+            participant DB as Stockage
+            Porteur->>Bracelet: Bouton SOS
+            Bracelet->>Bracelet: Signal local LED / bip
+            Bracelet->>API: POST type SOS + position
+            API->>DB: INSERT statut SUSPECT
+            API-->>Bracelet: 201 Created
+            Note over API: Visible via GET /api/alerts`,
+        },
+        {
+          title: 'Scénario 3 — Superviseur (rafraîchissement)',
+          pills: ['F3', 'Polling'],
+          lead: 'Le MVP simule le temps réel par **polling** (toutes les ~2 s) : simple et suffisant pour la démo jury.',
+          html: '',
+          diagram: `sequenceDiagram
+            participant Sup as Superviseur
+            participant Nav as Navigateur
+            participant API as API MWINDRA
+            loop Toutes les 2 s
+              Nav->>API: GET /api/alerts
+              API-->>Nav: Liste alertes
+              Nav-->>Sup: Affichage à jour
+            end`,
+        },
+        {
+          title: 'Scénario 4 — Détail puis traitement',
+          pills: ['F4', 'F5', 'PATCH'],
+          lead: 'Clic sur une ligne → détail ; le superviseur **confirme** ou **résout** avec une note.',
+          html: '',
+          diagram: `sequenceDiagram
+            participant Sup as Superviseur
+            participant Nav as Navigateur
+            participant API as API MWINDRA
+            Sup->>Nav: Clic alerte
+            Nav->>API: GET /api/events/id
+            API-->>Nav: Détail JSON
+            Sup->>Nav: Confirmer / résoudre
+            Nav->>API: PATCH statut + note
+            API-->>Nav: 200 OK`,
+        },
+        {
+          title: 'Cycle de vie d’une alerte',
+          pills: ['États', 'SUSPECT → RESOLVED'],
+          lead: 'Modèle simplifié : une alerte rouge ou SOS commence en **SUSPECT** ; le superviseur fait évoluer le statut.',
+          html: '',
+          diagram: `stateDiagram-v2
+            [*] --> SUSPECT: RED ou SOS
+            SUSPECT --> CONFIRMED: Superviseur confirme
+            SUSPECT --> RESOLVED: Clôture directe
+            CONFIRMED --> RESOLVED: Fin incident
+            RESOLVED --> [*]`,
+        },
+        {
+          title: 'Option — hors réseau (phase 2)',
+          pills: ['F7', 'File locale'],
+          lead: 'Si vous le tranchez dans la spec : file d’attente sur le bracelet puis renvoi automatique quand le réseau revient.',
+          html: '<p class="lead" style="font-size:0.85rem">À mentionner au jury comme **évolution** si le MVP temps réel suffit pour la V1.</p>',
+          diagram: `sequenceDiagram
+            participant B as Bracelet
+            participant M as Mémoire locale
+            participant API as API
+            B->>API: POST
+            API-->>B: Erreur / timeout
+            B->>M: Stocker en file
+            Note over B: Réseau revenu
+            B->>API: Rejeu POST
+            API-->>B: 201 OK`,
+        },
+        {
+          title: 'Démo live — à montrer ensuite',
+          pills: ['2 téléphones', 'PC'],
+          lead: 'Ouvrez ces pages sur le même Wi‑Fi (IPv4 du PC, pas 127.0.0.1 sur mobile).',
+          html: `<div class="live-grid">
+            <a class="tile" href="/bracelet"><strong>Poste A — Bracelet</strong><span>Mesure, envoi, SOS simulés.</span></a>
+            <a class="tile" href="/superviseur"><strong>Poste B — Superviseur</strong><span>Alertes, détail, statuts.</span></a>
+            <a class="tile" href="/simulation3d" style="grid-column:1/-1"><strong>Vue 3D</strong><span>Tunnel + halo selon µSv/h (option « Suivre l’API »).</span></a>
+          </div>`,
+          diagram: null,
+        },
+        {
+          title: 'Références',
+          pills: ['docs/', 'GitHub'],
+          lead: 'La documentation détaillée (spec, diagrammes complets, ER) reste dans le dépôt.',
+          html: `<ul class="check">
+            <li>Dossier <strong>docs/</strong> sur le repo : spec, organigramme, <code>DIAGRAMMES_MVP_PRE_DEV.md</code>.</li>
+            <li><a href="https://github.com/KEVINBMK/MWINDRA/tree/main/docs" style="color:#93c5fd">Voir docs sur GitHub →</a></li>
+          </ul>`,
+          diagram: null,
+        },
+      ];
+
+      const main = document.getElementById('main');
+      const progressEl = document.getElementById('progress');
+      const counterEl = document.getElementById('counter');
+      const prevBtn = document.getElementById('prev');
+      const nextBtn = document.getElementById('next');
+      const dotsEl = document.getElementById('dots');
+
+      let index = 0;
+      const rendered = new Set();
+
+      function esc(s) {
+        const d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+      }
+
+      function buildSlidesDOM() {
+        main.innerHTML = slides.map((s, i) => {
+          const pills = (s.pills || []).map((p) => `<span class="pill">${esc(p)}</span>`).join('');
+          const diagSection = s.diagram
+            ? `<div class="diagram-box" id="diag-host-${i}"><div class="mmd-wait">Chargement du schéma…</div></div>`
+            : '';
+          return `<section class="slide" data-idx="${i}" id="slide-${i}" role="tabpanel" aria-hidden="true">
+            <div class="pill-row">${pills}</div>
+            <h2>${esc(s.title)}</h2>
+            <p class="lead">${s.lead.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')}</p>
+            ${s.html || ''}
+            ${diagSection}
+          </section>`;
+        }).join('');
+
+        dotsEl.innerHTML = slides.map((_, i) =>
+          `<button type="button" data-go="${i}" aria-label="Scénario ${i + 1}" title="Scénario ${i + 1}"></button>`
+        ).join('');
+        dotsEl.querySelectorAll('button').forEach((b) => {
+          b.addEventListener('click', () => go(parseInt(b.getAttribute('data-go'), 10)));
+        });
+      }
+
+      async function renderDiagram(i) {
+        if (rendered.has(i)) return;
+        const s = slides[i];
+        if (!s.diagram) { rendered.add(i); return; }
+        const host = document.getElementById('diag-host-' + i);
+        if (!host || typeof mermaid === 'undefined') return;
+        const id = 'mmd-svg-' + i;
+        try {
+          const { svg } = await mermaid.render(id, s.diagram);
+          host.innerHTML = svg;
+          rendered.add(i);
+        } catch (e) {
+          host.innerHTML = '<p class="mmd-wait">Schéma non disponible (réseau ou navigateur). Consultez <code>docs/DIAGRAMMES_MVP_PRE_DEV.md</code> sur GitHub.</p>';
+          rendered.add(i);
+        }
+      }
+
+      function updateUI() {
+        slides.forEach((_, i) => {
+          const el = document.getElementById('slide-' + i);
+          if (!el) return;
+          const on = i === index;
+          el.classList.toggle('active', on);
+          el.setAttribute('aria-hidden', on ? 'false' : 'true');
+        });
+        progressEl.style.width = ((index + 1) / slides.length) * 100 + '%';
+        counterEl.textContent = index + 1 + ' / ' + slides.length;
+        prevBtn.disabled = index === 0;
+        nextBtn.disabled = index === slides.length - 1;
+        dotsEl.querySelectorAll('button').forEach((b, i) => b.classList.toggle('on', i === index));
+      }
+
+      async function go(i) {
+        index = Math.max(0, Math.min(slides.length - 1, i));
+        updateUI();
+        await renderDiagram(index);
+      }
+
+      mermaid.initialize(MERMAID_INIT);
+      buildSlidesDOM();
+      go(0);
+
+      prevBtn.addEventListener('click', () => go(index - 1));
+      nextBtn.addEventListener('click', () => go(index + 1));
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') go(index + 1);
+        if (e.key === 'ArrowLeft') go(index - 1);
+        if (e.key === 'Home') go(0);
+        if (e.key === 'End') go(slides.length - 1);
+      });
+    })();
+  </script>
+</body>
+</html>
