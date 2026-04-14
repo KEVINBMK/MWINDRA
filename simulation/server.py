@@ -202,6 +202,11 @@ def page_superviseur() -> FileResponse:
     return FileResponse(os.path.join(static_dir, "superviseur.html"))
 
 
+@app.get("/simulation3d")
+def page_simulation_3d() -> FileResponse:
+    return FileResponse(os.path.join(static_dir, "simulation3d.html"))
+
+
 if __name__ == "__main__":
     import uvicorn
 

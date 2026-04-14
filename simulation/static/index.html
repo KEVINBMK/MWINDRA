@@ -56,7 +56,10 @@
       color: var(--muted); margin: 0 0 1rem; font-weight: 600;
     }
     .actions { display: grid; gap: 0.75rem; }
-    @media (min-width: 520px) { .actions { grid-template-columns: 1fr 1fr; } }
+    @media (min-width: 520px) {
+      .actions { grid-template-columns: 1fr 1fr; }
+      .actions .tile-wide { grid-column: 1 / -1; }
+    }
     a.tile {
       display: flex; flex-direction: column; align-items: flex-start;
       padding: 1.25rem 1.35rem;
@@ -117,6 +120,11 @@
           <span class="role">Poste B</span>
           <strong>Tableau de supervision</strong>
           <span>Alertes, flux des événements, confirmation et clôture.</span>
+        </a>
+        <a class="tile tile-wide" href="/simulation3d">
+          <span class="role">Vue 3D</span>
+          <strong>Scène 3D (démonstration)</strong>
+          <span>Tunnel stylisé, travailleur fictif, halo selon le débit simulé — option pour suivre les mesures envoyées à l’API.</span>
         </a>
       </div>
     </section>

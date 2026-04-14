@@ -28,7 +28,8 @@ Le serveur écoute sur **`http://0.0.0.0:8000`** (toutes les interfaces).
 1. Sur le PC, notez l’adresse IPv4 du Wi‑Fi (ex. `192.168.1.20`).  
 2. **Téléphone A (bracelet)** : `http://192.168.1.20:8000/bracelet`  
 3. **Téléphone B (superviseur)** : `http://192.168.1.20:8000/superviseur`  
-4. Page d’accueil : `http://192.168.1.20:8000/`
+4. **Vue 3D (option)** : `http://192.168.1.20:8000/simulation3d`  
+5. Page d’accueil : `http://192.168.1.20:8000/`
 
 Sous Windows, autoriser **Python** dans le pare-feu pour le port **8000** (privé) si les téléphones ne chargent pas la page.
 

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="theme-color" content="#020617" />
+  <title>MWINDRA — Simulation 3D</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; overflow: hidden; font-family: system-ui, sans-serif; background: #020617; color: #e2e8f0; }
+    #ui {
+      position: absolute; z-index: 10; left: 0; right: 0; top: 0;
+      padding: 0.65rem 0.85rem;
+      background: linear-gradient(180deg, rgba(2,6,23,0.92) 0%, rgba(2,6,23,0.75) 85%, transparent 100%);
+      pointer-events: none;
+    }
+    #ui a, #ui label, #ui input, #ui button, #ui span.val { pointer-events: auto; }
+    #ui a.back { color: #93c5fd; font-size: 0.8rem; text-decoration: none; display: inline-block; margin-bottom: 0.35rem; }
+    #ui h1 { font-size: 0.95rem; margin: 0 0 0.35rem; font-weight: 700; }
+    #ui .sub { font-size: 0.7rem; color: #94a3b8; margin: 0 0 0.5rem; max-width: 42rem; }
+    #ui .row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; margin-top: 0.35rem; }
+    #ui input[type="range"] { width: min(220px, 42vw); }
+    #ui .val { font-variant-numeric: tabular-nums; font-weight: 700; min-width: 4.5rem; }
+    #ui button {
+      font-size: 0.75rem; padding: 0.4rem 0.65rem; border-radius: 8px; border: 1px solid #334155;
+      background: #1e293b; color: #e2e8f0; cursor: pointer;
+    }
+    #ui button.on { background: #1d4ed8; border-color: #3b82f6; }
+    #ui .pill {
+      font-size: 0.65rem; padding: 0.15rem 0.45rem; border-radius: 999px;
+      background: #14532d; color: #86efac; font-weight: 600;
+    }
+    #ui .pill.y { background: #713f12; color: #fde047; }
+    #ui .pill.r { background: #7f1d1d; color: #fecaca; }
+    #c3d { width: 100%; height: 100%; display: block; touch-action: none; }
+    .host { width: 100%; height: 100%; position: relative; }
+  </style>
+</head>
+<body>
+  <div class="host">
+    <div id="ui">
+      <a class="back" href="/">← Accueil démo</a>
+      <h1>Simulation 3D — champ simulé</h1>
+      <p class="sub">Représentation <strong>pédagogique</strong> : la couleur / l’intensité lumineuse illustrent le débit <strong>fictif</strong> (µSv/h). Aucune mesure réelle. Pincer pour zoomer, glisser pour tourner.</p>
+      <div class="row">
+        <label for="rad" style="font-size:0.75rem;color:#94a3b8">µSv/h</label>
+        <input type="range" id="rad" min="0" max="500" value="20" step="1" />
+        <span class="val" id="num">0.20</span>
+        <span id="pill" class="pill">VERT</span>
+      </div>
+      <div class="row">
+        <button type="button" id="rand">Aléatoire</button>
+        <button type="button" id="follow">Suivre l’API</button>
+      </div>
+    </div>
+    <canvas id="c3d"></canvas>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.159.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.159.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    const SEUIL_V = 0.5, SEUIL_J = 2;
+    const rad = document.getElementById('rad');
+    const num = document.getElementById('num');
+    const pill = document.getElementById('pill');
+
+    function uSv() { return parseInt(rad.value, 10) / 100; }
+    function niveau(v) {
+      if (v < SEUIL_V) return 'GREEN';
+      if (v < SEUIL_J) return 'YELLOW';
+      return 'RED';
+    }
+    function colorFrom(v) {
+      if (v < SEUIL_V) return new THREE.Color(0x22c55e);
+      if (v < SEUIL_J) return new THREE.Color(0xeab308);
+      return new THREE.Color(0xef4444);
+    }
+    function updatePill(v) {
+      const n = niveau(v);
+      pill.className = 'pill' + (n === 'YELLOW' ? ' y' : n === 'RED' ? ' r' : '');
+      pill.textContent = n === 'GREEN' ? 'VERT' : n === 'YELLOW' ? 'JAUNE' : 'ROUGE';
+    }
+
+    const canvas = document.getElementById('c3d');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x020617);
+    scene.fog = new THREE.FogExp2(0x020617, 0.045);
+
+    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 80);
+    camera.position.set(4.2, 2.8, 5.5);
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    const hemi = new THREE.HemisphereLight(0x4c6fb5, 0x0f172a, 0.35);
+    scene.add(hemi);
+    const dir = new THREE.DirectionalLight(0xffffff, 0.55);
+    dir.position.set(3, 8, 4);
+    dir.castShadow = true;
+    dir.shadow.mapSize.set(1024, 1024);
+    scene.add(dir);
+
+    const grid = new THREE.GridHelper(14, 14, 0x334155, 0x1e293b);
+    grid.position.y = 0;
+    scene.add(grid);
+
+    const tunnel = new THREE.Mesh(
+      new THREE.BoxGeometry(6, 3.2, 10),
+      new THREE.MeshStandardMaterial({
+        color: 0x0f172a,
+        metalness: 0.15,
+        roughness: 0.85,
+        transparent: true,
+        opacity: 0.35,
+        side: THREE.BackSide,
+      }),
+    );
+    tunnel.position.set(0, 1.55, 0);
+    scene.add(tunnel);
+
+    const bodyMat = new THREE.MeshStandardMaterial({
+      color: 0x334155,
+      metalness: 0.25,
+      roughness: 0.55,
+      emissive: new THREE.Color(0x14532d),
+      emissiveIntensity: 0.45,
+    });
+    const cap = new THREE.CapsuleGeometry(0.32, 0.85, 6, 12);
+    const worker = new THREE.Mesh(cap, bodyMat);
+    worker.castShadow = true;
+    worker.position.set(0, 0.95, 0);
+    scene.add(worker);
+
+    const ring = new THREE.Mesh(
+      new THREE.RingGeometry(0.55, 0.95, 48),
+      new THREE.MeshBasicMaterial({
+        color: 0x22c55e,
+        transparent: true,
+        opacity: 0.35,
+        side: THREE.DoubleSide,
+      }),
+    );
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.set(0, 0.02, 0);
+    scene.add(ring);
+
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(24, 24),
+      new THREE.MeshStandardMaterial({ color: 0x0b1220, metalness: 0.05, roughness: 0.95 }),
+    );
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.set(0, 1, 0);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.06;
+    controls.minDistance = 3;
+    controls.maxDistance = 14;
+    controls.maxPolarAngle = Math.PI / 2 - 0.08;
+
+    let followApi = false;
+    let t0 = performance.now();
+
+    function applyRadiationVisual(v) {
+      const c = colorFrom(v);
+      bodyMat.emissive.copy(c);
+      bodyMat.emissiveIntensity = 0.35 + Math.min(v, 4) * 0.22;
+      ring.material.color.copy(c);
+      ring.material.opacity = 0.25 + Math.min(v, 4) * 0.08;
+      num.textContent = v.toFixed(2);
+      updatePill(v);
+    }
+
+    rad.addEventListener('input', () => applyRadiationVisual(uSv()));
+    document.getElementById('rand').addEventListener('click', () => {
+      rad.value = String(Math.round(Math.random() * 500));
+      applyRadiationVisual(uSv());
+    });
+    document.getElementById('follow').addEventListener('click', (ev) => {
+      followApi = !followApi;
+      ev.target.classList.toggle('on', followApi);
+    });
+
+    async function pollApi() {
+      if (!followApi) return;
+      try {
+        const res = await fetch('/api/events?limit=15');
+        if (!res.ok) return;
+        const list = await res.json();
+        const last = list.find((e) => e.type === 'RADIATION' && e.radiationValue != null);
+        if (last) {
+          const v = Math.max(0, Math.min(5, last.radiationValue));
+          rad.value = String(Math.round(v * 100));
+          applyRadiationVisual(v);
+        }
+      } catch (_) { /* hors ligne */ }
+    }
+    setInterval(pollApi, 2000);
+
+    function resize() {
+      const host = canvas.parentElement;
+      const w = host.clientWidth;
+      const h = host.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h, false);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    applyRadiationVisual(uSv());
+
+    function frame(now) {
+      const t = (now - t0) * 0.001;
+      worker.position.y = 0.95 + Math.sin(t * 1.6) * 0.04;
+      const v = uSv();
+      const pulse = 1 + Math.sin(t * 3) * 0.04 * Math.min(v + 0.3, 2.5);
+      bodyMat.emissiveIntensity = (0.35 + Math.min(v, 4) * 0.22) * pulse;
+      controls.update();
+      renderer.render(scene, camera);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>
