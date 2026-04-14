@@ -10,3 +10,5 @@ Fichiers **2D** : spec, organigramme, diagrammes — séparés du code de démo 
 | [DIAGRAMMES_MVP_PRE_DEV.md](DIAGRAMMES_MVP_PRE_DEV.md) | Séquences, contexte, états, ER. |
 
 Retour au dépôt : [README à la racine](../README.md).
+
+**Démo visuelle jury** (lancer `simulation/` puis ouvrir dans le navigateur) : page **`/presentation-jury`** — enchaînement des scénarios avec diagrammes Mermaid + liens vers bracelet, superviseur et vue 3D.
