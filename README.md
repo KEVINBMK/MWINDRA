@@ -8,15 +8,14 @@ Dépôt de **cadrage et de spécification** pour le MVP logiciel (bracelet → A
 
 | Fichier | Rôle |
 |--------|------|
-| [`SPEC_MVP_LOGICIEL_MWINDRA.md`](SPEC_MVP_LOGICIEL_MWINDRA.md) | Spécification complète : questions d’accord, architecture, données, API, écrans, plan 4–5 jours, tests. |
-| [`EXPLICATION_SIMPLE_SPEC_MVP.md`](EXPLICATION_SIMPLE_SPEC_MVP.md) | Version simplifiée de la spec (lecture rapide pour toute l’équipe). |
-| [`ORGANIGRAMME_UTILISATEURS.md`](ORGANIGRAMME_UTILISATEURS.md) | Organigramme des rôles (terrain vs plateforme SaaS). |
-| [`DIAGRAMMES_MVP_PRE_DEV.md`](DIAGRAMMES_MVP_PRE_DEV.md) | Diagrammes de séquences, contexte, états, ER — avant développement. |
-| [`simulation/README.md`](simulation/README.md) | **Démo 2 téléphones** : API + pages « bracelet » et « superviseur » (tout simulé). |
+| [`docs/`](docs/) | **Documentation MVP** (spec, organigramme, diagrammes) — index : [`docs/README.md`](docs/README.md). |
+| [`simulation/README.md`](simulation/README.md) | **Démo jury** : API + pages bracelet / superviseur / 3D (tout simulé). |
+
+Les fichiers détaillés sont dans **`docs/`** : [`SPEC_MVP_LOGICIEL_MWINDRA.md`](docs/SPEC_MVP_LOGICIEL_MWINDRA.md), [`EXPLICATION_SIMPLE_SPEC_MVP.md`](docs/EXPLICATION_SIMPLE_SPEC_MVP.md), [`ORGANIGRAMME_UTILISATEURS.md`](docs/ORGANIGRAMME_UTILISATEURS.md), [`DIAGRAMMES_MVP_PRE_DEV.md`](docs/DIAGRAMMES_MVP_PRE_DEV.md).
 
 ---
 
-### Comment utiliser `SPEC_MVP_LOGICIEL_MWINDRA.md`
+### Comment utiliser `docs/SPEC_MVP_LOGICIEL_MWINDRA.md`
 
 1. **Ouvrir le fichier** (sur GitHub ou en local) et lire d’abord l’introduction + **« Comment utiliser ce document »** en haut.
 2. **Remplir / décider la section 1** (utilisateur demo, internet, GPS, alertes, seuils radiation, confidentialité). Sans ces choix, le développement part dans tous les sens.
@@ -41,11 +40,13 @@ Le modèle d’issue est dans [`.github/ISSUE_TEMPLATE/decisions-mvp.md`](.githu
 ```
 MWINDRA/
   README.md                          ← vous êtes ici
-  SPEC_MVP_LOGICIEL_MWINDRA.md       ← spec détaillée (référence)
-  EXPLICATION_SIMPLE_SPEC_MVP.md     ← résumé simple
-  ORGANIGRAMME_UTILISATEURS.md       ← rôles utilisateurs
-  DIAGRAMMES_MVP_PRE_DEV.md          ← séquences + états + ER
-  simulation/                        ← démo jury (Python + pages web)
+  docs/                              ← documentation MVP (2D : spec, organigramme, diagrammes)
+    README.md
+    SPEC_MVP_LOGICIEL_MWINDRA.md
+    EXPLICATION_SIMPLE_SPEC_MVP.md
+    ORGANIGRAMME_UTILISATEURS.md
+    DIAGRAMMES_MVP_PRE_DEV.md
+  simulation/                        ← démo jury (API + pages web + 3D)
   .github/ISSUE_TEMPLATE/
     decisions-mvp.md                 ← modèle d’issue (décisions)
 ```

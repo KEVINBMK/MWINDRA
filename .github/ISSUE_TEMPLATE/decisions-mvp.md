@@ -8,7 +8,7 @@ title: "Décisions MVP"
 
 1. Cliquez sur **Submit** pour créer l’issue (vous pouvez garder le titre **Décisions MVP**).
 2. Cochez les cases directement dans la description : **GitHub enregistre les coches** sur cette issue.
-3. Référence doc : [SPEC_MVP_LOGICIEL_MWINDRA.md](https://github.com/KEVINBMK/MWINDRA/blob/main/SPEC_MVP_LOGICIEL_MWINDRA.md)
+3. Référence doc : [SPEC_MVP_LOGICIEL_MWINDRA.md](https://github.com/KEVINBMK/MWINDRA/blob/main/docs/SPEC_MVP_LOGICIEL_MWINDRA.md)
 
 ---
 

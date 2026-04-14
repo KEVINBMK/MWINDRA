@@ -2,6 +2,8 @@
 
 Deux pages web + une petite API **sans bracelet** : pour répéter la démo devant le jury (2 téléphones + 1 PC).
 
+La **documentation MVP** (spec, organigramme, diagrammes en Markdown) est à part, dans le dossier **`docs/`** à la racine du dépôt (`../docs/` depuis ce fichier).
+
 ## Prérequis
 
 - Python **3.10+** recommandé  
