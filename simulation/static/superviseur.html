@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MWINDRA — Superviseur (simulation)</title>
+  <style>
+    :root { --bg:#0b1220; --card:#111827; --muted:#94a3b8; }
+    body { font-family: system-ui, sans-serif; margin: 0; background: var(--bg); color: #e2e8f0; padding: 1rem; }
+    h1 { font-size: 1.1rem; }
+    .card { background: var(--card); border-radius: 12px; padding: 1rem; margin-bottom: 1rem; }
+    label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.25rem; }
+    input { width: 100%; padding: 0.5rem; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; margin-bottom: 0.75rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th, td { padding: 0.4rem 0.25rem; text-align: left; border-bottom: 1px solid #1e293b; }
+    tr { cursor: pointer; }
+    tr:hover { background: #1e293b; }
+    .badge { display: inline-block; padding: 0.15rem 0.4rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+    .G { background: #14532d; color: #86efac; }
+    .Y { background: #713f12; color: #fde047; }
+    .R { background: #7f1d1d; color: #fecaca; }
+    .detail { font-size: 0.85rem; color: #cbd5e1; }
+    button { padding: 0.5rem 0.75rem; margin-right: 0.5rem; margin-top: 0.5rem; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    .b-ok { background: #2563eb; color: #fff; }
+    .b-end { background: #475569; color: #fff; }
+    small { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <h1>Superviseur — simulation</h1>
+  <div class="card">
+    <label>Token (pour confirmer / résoudre)</label>
+    <input id="token" value="demo-mwindra-2026" autocomplete="off" />
+    <p><small>Rafraîchissement auto toutes les 2 s · <a href="/static/seuils-demo.txt" style="color:#93c5fd">Seuils démo</a></small></p>
+  </div>
+  <div class="card">
+    <h2 style="font-size:1rem;margin-top:0">Alertes (rouge + SOS)</h2>
+    <div id="alerts"></div>
+  </div>
+  <div class="card">
+    <h2 style="font-size:1rem;margin-top:0">Flux récent</h2>
+    <div id="flux"></div>
+  </div>
+  <div class="card" id="panel" style="display:none">
+    <h2 style="font-size:1rem;margin-top:0">Détail événement #<span id="eid"></span></h2>
+    <div class="detail" id="detail"></div>
+    <button type="button" class="b-ok" id="conf">Confirmer</button>
+    <button type="button" class="b-end" id="res">Résolu</button>
+    <p id="pmsg" style="font-size:0.85rem;margin-top:0.5rem"></p>
+  </div>
+  <script>
+    let selectedId = null;
+    const tokenEl = document.getElementById('token');
+
+    function badge(level) {
+      const c = level === 'GREEN' ? 'G' : level === 'YELLOW' ? 'Y' : 'R';
+      const t = level === 'GREEN' ? 'VERT' : level === 'YELLOW' ? 'JAUNE' : 'ROUGE';
+      return '<span class="badge ' + c + '">' + t + '</span>';
+    }
+
+    async function fetchJson(path) {
+      const res = await fetch(path);
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
+    }
+
+    function renderAlerts(list) {
+      const el = document.getElementById('alerts');
+      if (!list.length) { el.innerHTML = '<p style="color:#64748b;margin:0">Aucune alerte critique pour l’instant.</p>'; return; }
+      let h = '<table><thead><tr><th>#</th><th>Bracelet</th><th>Type</th><th>Niveau</th><th>Heure</th></tr></thead><tbody>';
+      list.forEach((e) => {
+        h += '<tr data-id="' + e.id + '"><td>' + e.id + '</td><td>' + e.braceletId + '</td><td>' + e.type + '</td><td>' + badge(e.level) + '</td><td>' + (e.timestamp || '').slice(11, 19) + '</td></tr>';
+      });
+      h += '</tbody></table>';
+      el.innerHTML = h;
+      el.querySelectorAll('tr[data-id]').forEach((tr) => {
+        tr.addEventListener('click', () => openDetail(parseInt(tr.dataset.id, 10)));
+      });
+    }
+
+    function renderFlux(list) {
+      const el = document.getElementById('flux');
+      let h = '<table><thead><tr><th>#</th><th>Bracelet</th><th>Type</th><th>µSv/h</th><th>Statut</th></tr></thead><tbody>';
+      list.slice(0, 20).forEach((e) => {
+        const rv = e.radiationValue != null ? e.radiationValue.toFixed(2) : '—';
+        h += '<tr data-id="' + e.id + '"><td>' + e.id + '</td><td>' + e.braceletId + '</td><td>' + e.type + '</td><td>' + rv + '</td><td>' + e.status + '</td></tr>';
+      });
+      h += '</tbody></table>';
+      el.innerHTML = h;
+      el.querySelectorAll('tr[data-id]').forEach((tr) => {
+        tr.addEventListener('click', () => openDetail(parseInt(tr.dataset.id, 10)));
+      });
+    }
+
+    async function openDetail(id) {
+      selectedId = id;
+      const e = await fetchJson('/api/events/' + id);
+      document.getElementById('panel').style.display = 'block';
+      document.getElementById('eid').textContent = String(e.id);
+      document.getElementById('pmsg').textContent = '';
+      const parts = [
+        'Bracelet : <strong>' + e.braceletId + '</strong>',
+        'Type : ' + e.type,
+        'Niveau : ' + badge(e.level),
+        'Statut : ' + e.status,
+        'Valeur : ' + (e.radiationValue != null ? e.radiationValue + ' ' + e.radiationUnit : '—'),
+        'Position : ' + (e.lat != null ? e.lat + ', ' + e.lng : '—'),
+        'Heure : ' + e.timestamp,
+      ];
+      document.getElementById('detail').innerHTML = parts.join('<br/>');
+    }
+
+    async function patchStatus(status) {
+      if (!selectedId) return;
+      const res = await fetch('/api/events/' + selectedId, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + tokenEl.value.trim(),
+        },
+        body: JSON.stringify({ status }),
+      });
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch { data = {}; }
+      document.getElementById('pmsg').textContent = res.ok ? 'Enregistré ✓' : (data.detail || text);
+      document.getElementById('pmsg').style.color = res.ok ? '#4ade80' : '#f87171';
+      if (res.ok) openDetail(selectedId);
+    }
+
+    document.getElementById('conf').addEventListener('click', () => patchStatus('CONFIRMED'));
+    document.getElementById('res').addEventListener('click', () => patchStatus('RESOLVED'));
+
+    async function tick() {
+      try {
+        const [alerts, flux] = await Promise.all([
+          fetchJson('/api/alerts?limit=30'),
+          fetchJson('/api/events?limit=30'),
+        ]);
+        renderAlerts(alerts);
+        renderFlux(flux);
+      } catch (e) {
+        document.getElementById('alerts').innerHTML = '<p style="color:#f87171">Erreur réseau : vérifiez l’URL du serveur (même Wi‑Fi que le PC).</p>';
+      }
+    }
+
+    tick();
+    setInterval(tick, 2000);
+  </script>
+</body>
+</html>

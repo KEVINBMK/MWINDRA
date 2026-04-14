@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MWINDRA — Bracelet (simulation)</title>
+  <style>
+    :root { --ok:#16a34a; --warn:#ca8a04; --danger:#dc2626; --bg:#0b1220; --card:#111827; }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; margin: 0; min-height: 100vh; background: var(--bg); color: #e2e8f0; padding: 1rem; }
+    h1 { font-size: 1.1rem; margin: 0 0 0.5rem; }
+    .card { background: var(--card); border-radius: 12px; padding: 1rem; margin-bottom: 1rem; }
+    .led { width: 100%; height: 72px; border-radius: 12px; margin: 0.75rem 0; transition: background 0.2s; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .led.green { background: var(--ok); color: #052e16; }
+    .led.yellow { background: #eab308; color: #422006; }
+    .led.red { background: var(--danger); color: #fff; }
+    label { display: block; margin: 0.5rem 0 0.25rem; font-size: 0.85rem; color: #94a3b8; }
+    input[type="range"] { width: 100%; }
+    .val { font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+    button { width: 100%; padding: 1rem; margin-top: 0.5rem; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+    .btn-send { background: #2563eb; color: #fff; }
+    .btn-sos { background: var(--danger); color: #fff; }
+    .msg { font-size: 0.85rem; margin-top: 0.5rem; min-height: 1.25rem; }
+    .msg.ok { color: #4ade80; }
+    .msg.err { color: #f87171; }
+    input.text { width: 100%; padding: 0.5rem; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; }
+    small { color: #64748b; }
+  </style>
+</head>
+<body>
+  <h1>Bracelet — simulation</h1>
+  <div class="card">
+    <div id="led" class="led green">VERT</div>
+    <div class="val"><span id="num">0.20</span> <small>µSv/h</small></div>
+    <label for="rad">Glisser pour simuler le débit (démo)</label>
+    <input type="range" id="rad" min="0" max="500" value="20" step="1" />
+    <button type="button" class="btn-send" id="send">Envoyer la mesure</button>
+    <button type="button" class="btn-sos" id="sos">SOS — Urgence</button>
+    <div id="msg" class="msg"></div>
+  </div>
+  <div class="card">
+    <label>ID bracelet</label>
+    <input class="text" id="bid" value="BR-DEMO-01" />
+    <label>Token API (démo)</label>
+    <input class="text" id="token" value="demo-mwindra-2026" autocomplete="off" />
+    <p><small>Seuils : &lt;0,5 vert · 0,5–2 jaune · ≥2 rouge — <a href="/static/seuils-demo.txt" style="color:#93c5fd">détail</a></small></p>
+  </div>
+  <script>
+    const SEUIL_V = 0.5, SEUIL_J = 2;
+    const rad = document.getElementById('rad');
+    const num = document.getElementById('num');
+    const led = document.getElementById('led');
+    const msg = document.getElementById('msg');
+
+    function uSvFromSlider() { return parseInt(rad.value, 10) / 100; }
+
+    function niveau(v) {
+      if (v < SEUIL_V) return 'GREEN';
+      if (v < SEUIL_J) return 'YELLOW';
+      return 'RED';
+    }
+
+    function refreshLed() {
+      const v = uSvFromSlider();
+      num.textContent = v.toFixed(2);
+      const n = niveau(v);
+      led.className = 'led ' + (n === 'GREEN' ? 'green' : n === 'YELLOW' ? 'yellow' : 'red');
+      led.textContent = n === 'GREEN' ? 'VERT' : n === 'YELLOW' ? 'JAUNE' : 'ROUGE';
+    }
+
+    rad.addEventListener('input', refreshLed);
+    refreshLed();
+
+    async function postJson(path, body) {
+      const token = document.getElementById('token').value.trim();
+      const res = await fetch(path, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token,
+        },
+        body: JSON.stringify(body),
+      });
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch { data = { detail: text }; }
+      if (!res.ok) throw new Error(data.detail || res.statusText);
+      return data;
+    }
+
+    document.getElementById('send').addEventListener('click', async () => {
+      msg.textContent = '';
+      msg.className = 'msg';
+      const v = uSvFromSlider();
+      const bid = document.getElementById('bid').value.trim() || 'BR-DEMO-01';
+      try {
+        await postJson('/api/events', {
+          braceletId: bid,
+          type: 'RADIATION',
+          radiationValue: v,
+          radiationUnit: 'uSv/h',
+          lat: -4.32,
+          lng: 15.31,
+        });
+        msg.textContent = 'Mesure envoyée ✓';
+        msg.className = 'msg ok';
+      } catch (e) {
+        msg.textContent = String(e.message);
+        msg.className = 'msg err';
+      }
+    });
+
+    document.getElementById('sos').addEventListener('click', async () => {
+      msg.textContent = '';
+      msg.className = 'msg';
+      const bid = document.getElementById('bid').value.trim() || 'BR-DEMO-01';
+      try {
+        await postJson('/api/events', {
+          braceletId: bid,
+          type: 'SOS',
+          sos: true,
+          lat: -4.32,
+          lng: 15.31,
+        });
+        msg.textContent = 'SOS envoyé ✓';
+        msg.className = 'msg ok';
+      } catch (e) {
+        msg.textContent = String(e.message);
+        msg.className = 'msg err';
+      }
+    });
+  </script>
+</body>
+</html>

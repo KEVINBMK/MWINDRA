@@ -1,0 +1,13 @@
+MWINDRA — SEUILS UNIQUEMENT POUR SIMULATION / DEMO
+==================================================
+
+Unite affichee : microsieverts par heure (uSv/h)
+
+  VERT   : valeur < 0.5 uSv/h
+  JAUNE  : 0.5 uSv/h <= valeur < 2 uSv/h
+  ROUGE  : valeur >= 2 uSv/h
+
+SOS : toujours traite comme alerte critique (niveau ROUGE).
+
+Ces valeurs ne remplacent pas une etude reglementaire ni un appareil etalonne.
+Elles servent uniquement a illustrer le comportement du logiciel devant un jury.

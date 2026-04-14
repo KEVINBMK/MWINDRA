@@ -12,6 +12,7 @@ Dépôt de **cadrage et de spécification** pour le MVP logiciel (bracelet → A
 | [`EXPLICATION_SIMPLE_SPEC_MVP.md`](EXPLICATION_SIMPLE_SPEC_MVP.md) | Version simplifiée de la spec (lecture rapide pour toute l’équipe). |
 | [`ORGANIGRAMME_UTILISATEURS.md`](ORGANIGRAMME_UTILISATEURS.md) | Organigramme des rôles (terrain vs plateforme SaaS). |
 | [`DIAGRAMMES_MVP_PRE_DEV.md`](DIAGRAMMES_MVP_PRE_DEV.md) | Diagrammes de séquences, contexte, états, ER — avant développement. |
+| [`simulation/README.md`](simulation/README.md) | **Démo 2 téléphones** : API + pages « bracelet » et « superviseur » (tout simulé). |
 
 ---
 
@@ -44,6 +45,7 @@ MWINDRA/
   EXPLICATION_SIMPLE_SPEC_MVP.md     ← résumé simple
   ORGANIGRAMME_UTILISATEURS.md       ← rôles utilisateurs
   DIAGRAMMES_MVP_PRE_DEV.md          ← séquences + états + ER
+  simulation/                        ← démo jury (Python + pages web)
   .github/ISSUE_TEMPLATE/
     decisions-mvp.md                 ← modèle d’issue (décisions)
 ```
