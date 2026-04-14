@@ -212,6 +212,11 @@ def page_presentation_jury() -> FileResponse:
     return FileResponse(os.path.join(static_dir, "presentation-jury.html"))
 
 
+@app.get("/simulation2d")
+def page_simulation_2d() -> FileResponse:
+    return FileResponse(os.path.join(static_dir, "simulation2d.html"))
+
+
 if __name__ == "__main__":
     import uvicorn
 
