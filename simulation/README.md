@@ -44,7 +44,7 @@ Voir `static/seuils-demo.txt` et `GET /api/config/seuils`.
 
 ## Scénario rapide
 
-1. **Téléphone A** : glisser le curseur vers le **rouge** → **Envoyer la mesure**, ou utiliser **Niveau aléatoire** / **Pic aléatoire** / **Envoyer mesure aléatoire** pour la démo.  
+1. **Téléphone A** : glisser le curseur vers le **rouge** → **Envoyer la mesure**, ou utiliser **Niveau aléatoire** / **Envoyer mesure aléatoire** pour la démo.  
 2. **Téléphone B** : l’alerte apparaît dans **Alertes** (rafraîchissement ~2 s).  
 3. **Téléphone A** : appuyer sur **SOS**.  
 4. **Téléphone B** : cliquer sur une ligne → **Confirmer** / **Résolu**.
