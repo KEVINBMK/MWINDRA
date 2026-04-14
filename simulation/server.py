@@ -217,6 +217,11 @@ def page_simulation_2d() -> FileResponse:
     return FileResponse(os.path.join(static_dir, "simulation2d.html"))
 
 
+@app.get("/scenarios-animes")
+def page_scenarios_animes() -> FileResponse:
+    return FileResponse(os.path.join(static_dir, "scenarios-animes.html"))
+
+
 if __name__ == "__main__":
     import uvicorn
 

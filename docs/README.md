@@ -11,4 +11,4 @@ Fichiers **2D** : spec, organigramme, diagrammes — séparés du code de démo 
 
 Retour au dépôt : [README à la racine](../README.md).
 
-**Démo visuelle jury** (lancer `simulation/` puis ouvrir dans le navigateur) : page **`/presentation-jury`** — enchaînement des scénarios avec diagrammes Mermaid + liens vers bracelet, superviseur et vue 3D.
+**Démo visuelle jury** (lancer `simulation/` puis ouvrir dans le navigateur) : **`/presentation-jury`** (diagrammes Mermaid) ou **`/scenarios-animes`** (animations 2D pour non-spécialistes) — puis bracelet, superviseur, vues 2D/3D.

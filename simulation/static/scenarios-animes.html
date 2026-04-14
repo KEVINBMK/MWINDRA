@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0c1222" />
+  <title>MWINDRA — Scénarios animés (pour le jury)</title>
+  <style>
+    :root {
+      --bg: #0c1222;
+      --surface: #111827;
+      --border: #1e293b;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --ok: #4ade80;
+      --warn: #facc15;
+      --danger: #f87171;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); font-family: system-ui, "Segoe UI", sans-serif; line-height: 1.5; }
+    .top {
+      position: sticky; top: 0; z-index: 20;
+      background: linear-gradient(180deg, rgba(12,18,34,0.97) 80%, transparent);
+      padding: 0.55rem 0.85rem 0.4rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .top-inner { max-width: 760px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+    .top a.back { color: #7dd3fc; font-size: 0.78rem; text-decoration: none; }
+    .top h1 { font-size: 0.88rem; margin: 0; font-weight: 700; flex: 1 1 140px; }
+    .progress-wrap { flex: 2 1 160px; height: 5px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .progress-bar { height: 100%; background: linear-gradient(90deg, #0ea5e9, #6366f1); width: 0%; transition: width 0.2s ease; }
+    .counter { font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+    main { max-width: 760px; margin: 0 auto; padding: 0.75rem 0.85rem 5.25rem; }
+    .slide { display: none; animation: fade 0.4s ease; }
+    .slide.active { display: block; }
+    @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .slide h2 { font-size: 1.15rem; margin: 0 0 0.5rem; letter-spacing: -0.02em; }
+    .pedago {
+      margin: 0 0 0.85rem; padding: 0.55rem 0.65rem 0.55rem 0.75rem;
+      border-left: 4px solid var(--accent); background: rgba(56,189,248,0.08);
+      border-radius: 0 10px 10px 0; font-size: 0.88rem; color: #e2e8f0;
+    }
+    .lead { color: var(--muted); font-size: 0.82rem; margin: 0 0 0.65rem; }
+    .anim-shell {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin: 0.5rem 0 0.35rem;
+    }
+    #cv { display: block; width: 100%; height: auto; vertical-align: middle; }
+    .anim-hint { font-size: 0.72rem; color: var(--muted); margin: 0.35rem 0 0; text-align: center; }
+    .nav-fixed {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 30;
+      background: rgba(12,18,34,0.94); backdrop-filter: blur(10px);
+      border-top: 1px solid var(--border); padding: 0.55rem 0.75rem;
+    }
+    .nav-inner { max-width: 760px; margin: 0 auto; display: flex; gap: 0.45rem; align-items: center; flex-wrap: wrap; justify-content: space-between; }
+    .nav-fixed button {
+      font-size: 0.8rem; padding: 0.5rem 0.85rem; border-radius: 10px; border: 1px solid var(--border);
+      background: #1e293b; color: var(--text); cursor: pointer; font-weight: 600;
+    }
+    .nav-fixed button:disabled { opacity: 0.35; cursor: not-allowed; }
+    .nav-fixed button.primary { background: #2563eb; border-color: #3b82f6; color: #fff; }
+    .dots { display: flex; gap: 3px; flex-wrap: wrap; justify-content: center; flex: 1; }
+    .dots button { width: 9px; height: 9px; border-radius: 50%; border: none; padding: 0; cursor: pointer; background: #334155; }
+    .dots button.on { background: var(--accent); transform: scale(1.15); }
+    kbd { font-size: 0.65rem; background: #1e293b; border: 1px solid var(--border); padding: 0.06rem 0.28rem; border-radius: 4px; }
+    .links { margin-top: 0.75rem; font-size: 0.78rem; }
+    .links a { color: #7dd3fc; }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <div class="top-inner">
+      <a class="back" href="/">← Accueil</a>
+      <h1>Scénarios animés — langage simple</h1>
+      <div class="progress-wrap"><div class="progress-bar" id="progress"></div></div>
+      <span class="counter" id="counter">1 / —</span>
+    </div>
+  </div>
+  <main id="main"></main>
+  <div class="nav-fixed">
+    <div class="nav-inner">
+      <button type="button" id="prev">← Précédent</button>
+      <div class="dots" id="dots"></div>
+      <button type="button" id="next" class="primary">Suivant →</button>
+    </div>
+    <p style="max-width:760px;margin:0.35rem auto 0;font-size:0.68rem;color:var(--muted);text-align:center;">
+      <kbd>←</kbd> <kbd>→</kbd> — Animations en boucle : regardez quelques secondes par étape.
+    </p>
+  </div>
+
+  <script>
+(function () {
+  const LW = 720;
+  const LH = 400;
+  let canvas, ctx;
+  let cssW = LW, cssH = LH;
+  let slideIndex = 0;
+  let slides = [];
+  let rafId = 0;
+
+  function roundRect(x, y, w, h, r, fill, stroke) {
+    const rr = Math.min(r, w / 2, h / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + rr, y);
+    ctx.arcTo(x + w, y, x + w, y + h, rr);
+    ctx.arcTo(x + w, y + h, x, y + h, rr);
+    ctx.arcTo(x, y + h, x, y, rr);
+    ctx.arcTo(x, y, x + w, y, rr);
+    ctx.closePath();
+    if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+    if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 2; ctx.stroke(); }
+  }
+
+  function textCenter(str, x, y, size, color, bold) {
+    ctx.font = (bold ? '700 ' : '500 ') + size + 'px system-ui,sans-serif';
+    ctx.fillStyle = color;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(str, x, y);
+    ctx.textAlign = 'left';
+  }
+
+  function clearBg() {
+    const g = ctx.createLinearGradient(0, 0, LW, LH);
+    g.addColorStop(0, '#0f172a');
+    g.addColorStop(1, '#020617');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, LW, LH);
+  }
+
+  /** t = secondes depuis chargement page (continu) */
+  function sceneIntro(t) {
+    clearBg();
+    const pulse = 0.5 + 0.5 * Math.sin(t * 2.2);
+    ctx.strokeStyle = 'rgba(56,189,248,' + (0.15 + pulse * 0.25) + ')';
+    ctx.lineWidth = 3;
+    for (let i = 1; i <= 4; i++) {
+      ctx.beginPath();
+      ctx.arc(LW / 2, LH / 2, 40 + i * 38 + pulse * 8, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    textCenter('MWINDRA', LW / 2, LH / 2 - 8, 28, '#f8fafc', true);
+    textCenter('Sécurité minière — vision MVP', LW / 2, LH / 2 + 22, 14, '#94a3b8', false);
+  }
+
+  function sceneIdee(t) {
+    clearBg();
+    const x0 = 80;
+    const y = LH / 2;
+    roundRect(x0, y - 55, 140, 110, 12, '#1e293b', '#475569');
+    textCenter('Ouvrier', x0 + 70, y - 25, 13, '#e2e8f0', true);
+    textCenter('sous terre', x0 + 70, y + 5, 11, '#94a3b8', false);
+    ctx.fillStyle = '#fbbf24';
+    ctx.beginPath();
+    ctx.arc(x0 + 70, y - 48, 10, 0, Math.PI * 2);
+    ctx.fill();
+
+    const x1 = 290;
+    roundRect(x1, y - 45, 130, 90, 12, '#172554', '#3b82f6');
+    textCenter('Bracelet', x1 + 65, y - 12, 13, '#93c5fd', true);
+    textCenter('connecté', x1 + 65, y + 14, 11, '#94a3b8', false);
+
+    const x2 = 500;
+    roundRect(x2, y - 55, 160, 110, 12, '#1e1b4b', '#818cf8');
+    textCenter('Équipe au', x2 + 80, y - 22, 12, '#c7d2fe', true);
+    textCenter('sol + bureau', x2 + 80, y + 4, 11, '#a5b4fc', false);
+    textCenter('qui suit les alertes', x2 + 80, y + 32, 10, '#94a3b8', false);
+
+    const flow = (t * 0.4) % 1;
+    ctx.strokeStyle = 'rgba(148,163,184,0.6)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([8, 8]);
+    ctx.lineDashOffset = -t * 40;
+    ctx.beginPath();
+    ctx.moveTo(x0 + 140, y);
+    ctx.lineTo(x1, y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x1 + 130, y);
+    ctx.lineTo(x2, y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    const dot = flow;
+    const px = x0 + 140 + (x1 - x0 - 140) * dot;
+    ctx.fillStyle = '#38bdf8';
+    ctx.beginPath();
+    ctx.arc(px, y, 6, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function sceneArchitecture(t) {
+    clearBg();
+    textCenter('Vue simplifiée du système (même idée que le diagramme de contexte)', LW / 2, 28, 12, '#94a3b8', false);
+    const boxes = [
+      { x: 50, y: 100, w: 130, h: 70, label: 'Terrain', sub: 'Porteur + bracelet', c: '#14532d', b: '#22c55e' },
+      { x: 230, y: 115, w: 100, h: 55, label: 'Internet', sub: 'données chiffrées', c: '#1e3a5f', b: '#38bdf8' },
+      { x: 370, y: 85, w: 150, h: 120, label: 'Plateforme', sub: 'serveur + base', c: '#312e81', b: '#818cf8' },
+      { x: 560, y: 100, w: 130, h: 90, label: 'Superviseur', sub: 'écran web', c: '#713f12', b: '#fbbf24' },
+    ];
+    const appear = (t * 0.6) % 5;
+    boxes.forEach((b, i) => {
+      const a = Math.min(1, Math.max(0, appear - i * 0.22) * 3);
+      ctx.globalAlpha = 0.2 + a * 0.8;
+      roundRect(b.x, b.y, b.w, b.h, 10, b.c, b.b);
+      textCenter(b.label, b.x + b.w / 2, b.y + 26, 13, '#f1f5f9', true);
+      textCenter(b.sub, b.x + b.w / 2, b.y + 50, 10, '#cbd5e1', false);
+      ctx.globalAlpha = 1;
+    });
+    const u = (Math.sin(t * 1.8) * 0.5 + 0.5);
+    ctx.strokeStyle = 'rgba(56,189,248,' + (0.3 + u * 0.4) + ')';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(180, 135);
+    ctx.lineTo(230, 135);
+    ctx.moveTo(330, 145);
+    ctx.lineTo(370, 145);
+    ctx.moveTo(520, 145);
+    ctx.lineTo(560, 145);
+    ctx.stroke();
+  }
+
+  function sceneMesure(t) {
+    clearBg();
+    textCenter('Scénario : une mesure « normale » (radiation simulée)', LW / 2, 30, 12, '#94a3b8', false);
+    const bx = 100, by = 160, bw = 120, bh = 85;
+    roundRect(bx, by, bw, bh, 10, '#1e293b', '#64748b');
+    textCenter('Bracelet', bx + bw / 2, by + 32, 14, '#e2e8f0', true);
+    textCenter('µSv/h', bx + bw / 2, by + 58, 11, '#94a3b8', false);
+
+    const ax = 320, ay = 150, aw = 130, ah = 100;
+    roundRect(ax, ay, aw, ah, 10, '#1e1b4b', '#6366f1');
+    textCenter('API', ax + aw / 2, ay + 38, 15, '#c7d2fe', true);
+    textCenter('vérifie + enregistre', ax + aw / 2, ay + 62, 10, '#94a3b8', false);
+
+    const dx = 520, dy = 165, dw = 70, dh = 75;
+    ctx.fillStyle = '#334155';
+    ctx.beginPath();
+    ctx.ellipse(dx + dw / 2, dy + dh / 2, dw / 2, dh / 2.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#64748b';
+    ctx.stroke();
+    textCenter('Stockage', dx + dw / 2, dy + dh / 2, 10, '#e2e8f0', true);
+
+    const cycle = (t * 0.35) % 1;
+    const path = [
+      { x: bx + bw, y: by + bh / 2 },
+      { x: ax, y: ay + ah / 2 },
+      { x: ax + aw, y: ay + ah / 2 },
+      { x: dx, y: dy + dh / 2 },
+    ];
+    ctx.strokeStyle = 'rgba(148,163,184,0.5)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(path[0].x, path[0].y);
+    for (let i = 1; i < path.length; i++) ctx.lineTo(path[i].x, path[i].y);
+    ctx.stroke();
+
+    let seg = cycle * 3;
+    let i = Math.floor(seg);
+    let f = seg - i;
+    if (i >= 3) { i = 2; f = 1; }
+    const p0 = path[i], p1 = path[i + 1];
+    const px = p0.x + (p1.x - p0.x) * f;
+    const py = p0.y + (p1.y - p0.y) * f;
+    ctx.shadowColor = '#38bdf8';
+    ctx.shadowBlur = 12;
+    ctx.fillStyle = '#38bdf8';
+    ctx.beginPath();
+    ctx.arc(px, py, 9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    if (cycle > 0.85) {
+      ctx.fillStyle = 'rgba(74,222,128,0.35)';
+      ctx.beginPath();
+      ctx.arc(dx + dw / 2, dy + dh / 2, 28 + Math.sin(t * 20) * 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  function sceneSeuils(t) {
+    clearBg();
+    textCenter('Seuils démo : le bracelet (ou l’écran) passe vert → jaune → rouge', LW / 2, 32, 11, '#94a3b8', false);
+    const y = 200;
+    const x0 = 80, wbar = 560;
+    const g = ctx.createLinearGradient(x0, y, x0 + wbar, y);
+    g.addColorStop(0, '#22c55e');
+    g.addColorStop(0.1, '#22c55e');
+    g.addColorStop(0.11, '#eab308');
+    g.addColorStop(0.36, '#eab308');
+    g.addColorStop(0.37, '#ef4444');
+    g.addColorStop(1, '#ef4444');
+    roundRect(x0, y - 24, wbar, 48, 8, g, '#334155');
+    textCenter('< 0,5', x0 + wbar * 0.05, y + 52, 10, '#86efac', false);
+    textCenter('0,5 — 2', x0 + wbar * 0.23, y + 52, 10, '#fde047', false);
+    textCenter('≥ 2 µSv/h', x0 + wbar * 0.72, y + 52, 10, '#fecaca', false);
+    const needle = 0.5 + 0.45 * Math.sin(t * 0.9);
+    const nx = x0 + wbar * needle;
+    ctx.fillStyle = '#f8fafc';
+    ctx.beginPath();
+    ctx.moveTo(nx, y - 50);
+    ctx.lineTo(nx - 8, y - 32);
+    ctx.lineTo(nx + 8, y - 32);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#0f172a';
+    ctx.stroke();
+  }
+
+  function sceneSOS(t) {
+    clearBg();
+    textCenter('Scénario urgence : le porteur appuie sur SOS', LW / 2, 34, 12, '#94a3b8', false);
+    const bx = 120, by = 140;
+    roundRect(bx, by, 140, 100, 12, '#450a0a', '#ef4444');
+    textCenter('SOS', bx + 70, by + 40, 22, '#fff', true);
+    textCenter('priorité max', bx + 70, by + 72, 10, '#fecaca', false);
+    const wave = (t * 3) % 1;
+    for (let r = 0; r < 3; r++) {
+      const a = Math.max(0, 1 - Math.abs(wave * 3 - r) * 1.2);
+      ctx.strokeStyle = 'rgba(248,113,113,' + (a * 0.7) + ')';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(bx + 70, by + 50, 80 + r * 55 + wave * 40, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    const ax = 420, ay = 130;
+    roundRect(ax, ay, 200, 120, 12, '#1e1b4b', '#a78bfa');
+    textCenter('Plateforme', ax + 100, ay + 45, 14, '#e9d5ff', true);
+    textCenter('marque l’alerte « à traiter »', ax + 100, ay + 78, 11, '#c4b5fd', false);
+    const dash = (t * 120) % 40;
+    ctx.setLineDash([12, 12]);
+    ctx.lineDashOffset = -dash;
+    ctx.strokeStyle = '#f87171';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(bx + 140, by + 50);
+    ctx.lineTo(ax, ay + 60);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  function scenePolling(t) {
+    clearBg();
+    textCenter('Le superviseur ne « rafraîchit » pas tout seul : le navigateur redemande la liste', LW / 2, 30, 11, '#94a3b8', false);
+    roundRect(80, 120, 200, 140, 12, '#1e293b', '#475569');
+    textCenter('Superviseur', 180, 165, 13, '#e2e8f0', true);
+    textCenter('regarde l’écran', 180, 192, 11, '#94a3b8', false);
+    roundRect(110, 210, 140, 40, 6, '#0f172a', '#334155');
+    textCenter('Liste des alertes', 180, 230, 10, '#94a3b8', false);
+
+    const ax = 400, ay = 110;
+    roundRect(ax, ay, 240, 170, 12, '#172554', '#3b82f6');
+    textCenter('Serveur MWINDRA', ax + 120, ay + 40, 14, '#93c5fd', true);
+    textCenter('GET /api/alerts', ax + 120, ay + 95, 12, '#bfdbfe', true);
+
+    const beat = Math.floor(t * 1.2) % 2;
+    ctx.strokeStyle = beat ? '#38bdf8' : '#1d4ed8';
+    ctx.lineWidth = beat ? 4 : 2;
+    ctx.beginPath();
+    ctx.moveTo(280, 200);
+    ctx.lineTo(ax, 200);
+    ctx.stroke();
+    ctx.fillStyle = beat ? '#38bdf8' : '#64748b';
+    textCenter(beat ? '… nouvelles données …' : '… attente …', (280 + ax) / 2, 175, 10, '#cbd5e1', false);
+  }
+
+  function scenePatch(t) {
+    clearBg();
+    textCenter('Le superviseur ouvre le détail puis clôt ou confirme (même idée que PATCH)', LW / 2, 28, 11, '#94a3b8', false);
+    roundRect(60, 100, 200, 200, 12, '#1e293b', '#475569');
+    textCenter('Clic sur une ligne', 160, 160, 12, '#e2e8f0', true);
+    const blink = Math.sin(t * 4) > 0;
+    roundRect(90, 200, 140, 70, 8, blink ? '#1e3a5f' : '#0f172a', '#38bdf8');
+    textCenter('Fiche incident', 160, 230, 11, '#93c5fd', true);
+
+    const ax = 340, ay = 130;
+    roundRect(ax, ay, 200, 150, 12, '#1e1b4b', '#818cf8');
+    textCenter('API', ax + 100, ay + 55, 14, '#c7d2fe', true);
+    textCenter('PATCH statut + note', ax + 100, ay + 95, 11, '#a5b4fc', false);
+
+    const phase = (t * 0.25) % 1;
+    if (phase < 0.35) {
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(260, 220);
+      ctx.lineTo(ax, 205);
+      ctx.stroke();
+    } else {
+      ctx.strokeStyle = '#4ade80';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(ax + 100, ay + 150);
+      ctx.lineTo(160, 260);
+      ctx.stroke();
+      textCenter('OK enregistré', 260, 285, 11, '#86efac', false);
+    }
+  }
+
+  function sceneEtats(t) {
+    clearBg();
+    textCenter('États d’une alerte (simplifié)', LW / 2, 36, 12, '#94a3b8', false);
+    const nodes = [
+      { x: 120, label: 'À traiter\n(SUSPECT)', c: '#7f1d1d' },
+      { x: 300, label: 'Confirmé', c: '#854d0e' },
+      { x: 480, label: 'Terminé\n(RESOLVED)', c: '#14532d' },
+    ];
+    const step = Math.floor(t * 0.35) % 4;
+    nodes.forEach((n, i) => {
+      const on = (step >= i && step < 3) || (step === 3 && i === 2);
+      const r = on ? 38 : 32;
+      ctx.beginPath();
+      ctx.arc(n.x, 210, r, 0, Math.PI * 2);
+      ctx.fillStyle = n.c;
+      ctx.globalAlpha = on ? 1 : 0.45;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = on ? '#f8fafc' : '#475569';
+      ctx.lineWidth = on ? 3 : 1;
+      ctx.stroke();
+      const lines = n.label.split('\n');
+      lines.forEach((line, j) => textCenter(line, n.x, 205 + j * 14 - (lines.length - 1) * 7, 10, '#fff', true));
+    });
+    ctx.strokeStyle = '#64748b';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(160, 210);
+    ctx.lineTo(252, 210);
+    ctx.moveTo(340, 210);
+    ctx.lineTo(432, 210);
+    ctx.stroke();
+    if (step === 0) textCenter('Nouvelle alerte rouge ou SOS', LW / 2, 320, 11, '#fca5a5', false);
+    if (step === 1) textCenter('Le superviseur confirme la gravité', LW / 2, 320, 11, '#fde047', false);
+    if (step >= 2) textCenter('L’incident est clos dans l’outil', LW / 2, 320, 11, '#86efac', false);
+  }
+
+  function sceneER(t) {
+    clearBg();
+    textCenter('Où sont stockées les infos ? (schéma ER très simplifié)', LW / 2, 32, 11, '#94a3b8', false);
+    roundRect(80, 110, 220, 130, 12, '#1e293b', '#475569');
+    textCenter('Bracelets', 190, 145, 13, '#e2e8f0', true);
+    textCenter('identifiant, équipe…', 190, 175, 10, '#94a3b8', false);
+    roundRect(420, 110, 220, 130, 12, '#1e293b', '#475569');
+    textCenter('Événements', 530, 145, 13, '#e2e8f0', true);
+    textCenter('mesure, SOS, statut…', 530, 175, 10, '#94a3b8', false);
+    const beat = (t * 1.5) % 1;
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 2 + beat * 2;
+    ctx.beginPath();
+    ctx.moveTo(300, 175);
+    ctx.lineTo(420, 175);
+    ctx.stroke();
+    textCenter('chaque mesure est liée à un bracelet', LW / 2, 285, 10, '#7dd3fc', false);
+    const px = 300 + (420 - 300) * beat;
+    ctx.fillStyle = '#fbbf24';
+    ctx.beginPath();
+    ctx.arc(px, 175, 7, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function sceneExport(t) {
+    clearBg();
+    textCenter('Historique et preuve (comme le flux « export CSV » du doc)', LW / 2, 30, 11, '#94a3b8', false);
+    roundRect(100, 130, 200, 120, 12, '#1e293b', '#475569');
+    textCenter('Filtres', 200, 175, 12, '#e2e8f0', true);
+    textCenter('dates, équipe…', 200, 205, 10, '#94a3b8', false);
+    const ax = 380, ay = 120;
+    roundRect(ax, ay, 260, 150, 12, '#172554', '#3b82f6');
+    textCenter('Serveur', ax + 130, ay + 55, 13, '#93c5fd', true);
+    textCenter('prépare le fichier', ax + 130, ay + 88, 11, '#94a3b8', false);
+    const u = (t * 0.4) % 1;
+    const fy = 160 - u * 50;
+    roundRect(ax + 180, fy, 56, 40, 6, '#14532d', '#22c55e');
+    textCenter('.csv', ax + 208, fy + 22, 10, '#bbf7d0', true);
+    ctx.strokeStyle = 'rgba(148,163,184,0.6)';
+    ctx.setLineDash([6, 6]);
+    ctx.beginPath();
+    ctx.moveTo(300, 190);
+    ctx.lineTo(ax + 208, fy + 20);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    textCenter('à archiver ou à montrer à un inspecteur', LW / 2, 310, 10, '#86efac', false);
+  }
+
+  function sceneFile(t) {
+    clearBg();
+    textCenter('Option « hors réseau » (phase 2) : les mesures attendent en file', LW / 2, 32, 11, '#94a3b8', false);
+    roundRect(100, 140, 120, 100, 10, '#292524', '#78716c');
+    textCenter('Bracelet', 160, 185, 12, '#e7e5e4', true);
+    const stack = 4;
+    const lift = Math.max(0, ((t * 0.2) % 3) - 1.2) * 80;
+    for (let i = 0; i < stack; i++) {
+      const y = 260 - i * 22 - lift;
+      ctx.fillStyle = i === stack - 1 && lift > 10 ? '#38bdf8' : '#475569';
+      roundRect(130, y, 60, 18, 4, ctx.fillStyle, '#64748b');
+    }
+    roundRect(400, 130, 200, 120, 12, '#172554', '#3b82f6');
+    textCenter('Quand le réseau revient', 500, 175, 12, '#93c5fd', true);
+    textCenter('envoi automatique', 500, 205, 11, '#94a3b8', false);
+    if (lift > 30) {
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(190, 200 - lift);
+      ctx.lineTo(400, 190);
+      ctx.stroke();
+    }
+  }
+
+  function sceneOrganigramme(t) {
+    clearBg();
+    textCenter('Qui décide ? (organigramme très simplifié)', LW / 2, 30, 11, '#94a3b8', false);
+    const levels = [
+      { y: 85, w: 160, label: 'Direction / QHSE', sub: 'cadre' },
+      { y: 155, w: 180, label: 'Responsable sécurité', sub: 'pilote MWINDRA' },
+      { y: 225, w: 200, label: 'Superviseur de zone', sub: 'traite les alertes' },
+      { y: 305, w: 140, label: 'Porteur bracelet', sub: 'terrain' },
+    ];
+    const prog = Math.min(1, t * 0.15);
+    levels.forEach((L, i) => {
+      const delay = i * 0.12;
+      const a = Math.min(1, Math.max(0, (prog - delay) * 4));
+      const x = LW / 2 - L.w / 2;
+      ctx.globalAlpha = 0.2 + 0.8 * a;
+      roundRect(x, L.y, L.w, 52, 8, '#1e293b', '#64748b');
+      textCenter(L.label, LW / 2, L.y + 22, 11, '#f1f5f9', true);
+      textCenter(L.sub, LW / 2, L.y + 40, 9, '#94a3b8', false);
+      ctx.globalAlpha = 1;
+      if (i < levels.length - 1 && prog > delay + 0.15) {
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(LW / 2, L.y + 52);
+        ctx.lineTo(LW / 2, levels[i + 1].y);
+        ctx.stroke();
+      }
+    });
+  }
+
+  function sceneFin(t) {
+    clearBg();
+    textCenter('Ensuite : montrez la démo réelle sur téléphones', LW / 2, 100, 13, '#e2e8f0', true);
+    textCenter('Les diagrammes détaillés restent dans docs/ sur GitHub', LW / 2, 140, 11, '#94a3b8', false);
+    const y0 = 200;
+    const links = ['/bracelet', '/superviseur', '/simulation2d', '/simulation3d', '/presentation-jury'];
+    links.forEach((href, i) => {
+      const col = i % 3;
+      const row = Math.floor(i / 3);
+      const x = 70 + col * 195;
+      const y = y0 + row * 58;
+      roundRect(x - 8, y - 20, 175, 40, 8, '#1e293b', '#334155');
+      const lab = href.replace(/\//g, '') || 'accueil';
+      textCenter(lab.length > 18 ? lab.slice(0, 16) + '…' : lab, x + 80, y, 9, '#7dd3fc', true);
+    });
+    textCenter('Ce parcours remplace les schémas Mermaid par des mouvements lisibles.', LW / 2, 320, 10, '#64748b', false);
+  }
+
+  slides = [
+    {
+      title: 'Bienvenue',
+      pedago: 'Pour les membres du jury qui ne sont pas du domaine « mine / IoT » : chaque étape reprend une idée des diagrammes du dossier, mais en images qui bougent.',
+      lead: 'Avancez avec « Suivant ». Les animations tournent en boucle sur chaque écran.',
+      render: sceneIntro,
+    },
+    {
+      title: 'L’idée en une phrase',
+      pedago: 'On ne vous demande pas de connaître les capteurs : retenez seulement le fil « personne sous terre » → « objet connecté » → « équipe qui surveille ».',
+      lead: '',
+      render: sceneIdee,
+    },
+    {
+      title: 'Les grands blocs',
+      pedago: 'C’est l’équivalent du diagramme de contexte : quatre cases reliées. Tout le logiciel MVP raconte ce qui se passe entre ces cases.',
+      lead: '',
+      render: sceneArchitecture,
+    },
+    {
+      title: 'Une mesure qui part du bracelet',
+      pedago: 'Comme sur le diagramme de séquence « F1 » : un petit paquet de données part, le serveur le valide, il est stocké. Pas de physique réelle ici : démo pédagogique.',
+      lead: '',
+      render: sceneMesure,
+    },
+    {
+      title: 'Couleurs = niveaux d’attention',
+      pedago: 'Les chiffres exacts importent peu pour le jury ; retenez : vert calme, jaune prudence, rouge action renforcée. Les seuils sont fixés pour la démonstration uniquement.',
+      lead: '',
+      render: sceneSeuils,
+    },
+    {
+      title: 'Bouton SOS',
+      pedago: 'Même logique que le diagramme « F2 » : signal très visible côté plateforme, pour que quelqu’un au bureau réagisse vite.',
+      lead: '',
+      render: sceneSOS,
+    },
+    {
+      title: 'L’écran du superviseur se met à jour',
+      pedago: 'Équivalent du diagramme « F3 » (rafraîchissement) : pensez à un courriel qu’on actualise — ici c’est la liste des alertes qui se redemande toutes les quelques secondes.',
+      lead: '',
+      render: scenePolling,
+    },
+    {
+      title: 'Cliquer, lire, puis valider',
+      pedago: 'Les diagrammes « F4 + F5 » : ouvrir la fiche, puis dire à l’outil « confirmé » ou « terminé » avec une courte note. Ça trace la décision pour plus tard.',
+      lead: '',
+      render: scenePatch,
+    },
+    {
+      title: 'Où en est l’alerte ?',
+      pedago: 'Le diagramme « états » en version très courte : à traiter → confirmé → terminé. Utile pour les audits et les rapports.',
+      lead: '',
+      render: sceneEtats,
+    },
+    {
+      title: 'Deux tables liées (données)',
+      pedago: 'Équivalent ultra-réduit du diagramme « ER » du dossier : un bracelet, plusieurs lignes d’historique. Pas besoin de connaître SQL pour saisir l’idée.',
+      lead: '',
+      render: sceneER,
+    },
+    {
+      title: 'Exporter pour la preuve',
+      pedago: 'Le flux « F6 » du document : filtrer l’historique puis télécharger un fichier tableur — utile pour les enquêtes ou le QHSE.',
+      lead: '',
+      render: sceneExport,
+    },
+    {
+      title: 'Si le réseau coupe (option future)',
+      pedago: 'Diagramme « F7 » : le bracelet garde des mesures en mémoire et les envoie quand le tunnel radio / Wi‑Fi revient. Ce n’est pas obligatoire au premier livrable.',
+      lead: '',
+      render: sceneFile,
+    },
+    {
+      title: 'Qui fait quoi dans l’entreprise ?',
+      pedago: 'Rappel de l’organigramme utilisateurs : la chaîne de décision du terrain vers le management — MWINDRA s’insère surtout entre superviseur et porteur.',
+      lead: '',
+      render: sceneOrganigramme,
+    },
+    {
+      title: 'Après cette partie « dessin animé »',
+      pedago: 'Vous avez vu les mêmes scénarios que dans les documents techniques, sans lire le formalisme des diagrammes. La démo sur téléphone prouve que c’est déjà jouable en prototype.',
+      lead: '',
+      render: sceneFin,
+    },
+  ];
+
+  function buildMain() {
+    const main = document.getElementById('main');
+    main.innerHTML = slides.map((s, i) => `
+      <section class="slide" id="slide-${i}" data-idx="${i}">
+        <h2>${escapeHtml(s.title)}</h2>
+        <p class="pedago">${escapeHtml(s.pedago)}</p>
+        ${s.lead ? '<p class="lead">' + escapeHtml(s.lead) + '</p>' : ''}
+        <div class="anim-shell"><canvas id="cv-${i}" width="${LW}" height="${LH}" aria-hidden="${i === 0 ? 'false' : 'true'}"></canvas></div>
+        <p class="anim-hint">Animation illustrative — données fictives.</p>
+        <div class="links"><a href="https://github.com/KEVINBMK/MWINDRA/tree/main/docs">Documentation détaillée (docs/) →</a></div>
+      </section>
+    `).join('');
+
+    const dots = document.getElementById('dots');
+    dots.innerHTML = slides.map((_, i) => `<button type="button" data-i="${i}" aria-label="Étape ${i + 1}"></button>`).join('');
+    dots.querySelectorAll('button').forEach((el) => {
+      el.addEventListener('click', () => go(parseInt(el.getAttribute('data-i'), 10)));
+    });
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function go(i) {
+    slideIndex = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((_, j) => {
+      const el = document.getElementById('slide-' + j);
+      if (!el) return;
+      el.classList.toggle('active', j === slideIndex);
+    });
+    canvas = document.getElementById('cv-' + slideIndex);
+    if (canvas) ctx = canvas.getContext('2d');
+    document.getElementById('progress').style.width = ((slideIndex + 1) / slides.length) * 100 + '%';
+    document.getElementById('counter').textContent = slideIndex + 1 + ' / ' + slides.length;
+    document.getElementById('prev').disabled = slideIndex === 0;
+    document.getElementById('next').disabled = slideIndex === slides.length - 1;
+    dotsUpdate();
+  }
+
+  function dotsUpdate() {
+    document.querySelectorAll('.dots button').forEach((b, j) => b.classList.toggle('on', j === slideIndex));
+  }
+
+  function resizeCanvases() {
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    slides.forEach((_, i) => {
+      const c = document.getElementById('cv-' + i);
+      if (!c) return;
+      const shell = c.parentElement;
+      const rect = shell.getBoundingClientRect();
+      const w = Math.min(LW, Math.floor(rect.width));
+      c.style.width = w + 'px';
+      c.style.height = Math.floor(w * LH / LW) + 'px';
+      c.width = Math.floor(w * dpr);
+      c.height = Math.floor(w * LH / LW * dpr);
+    });
+    cssW = LW;
+    cssH = LH;
+  }
+
+  let t0 = performance.now();
+  function loop(now) {
+    const t = (now - t0) * 0.001;
+    const c = document.getElementById('cv-' + slideIndex);
+    if (c && slides[slideIndex]) {
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      ctx = c.getContext('2d');
+      const w = c.width / dpr;
+      const h = c.height / dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+      ctx.save();
+      ctx.scale(w / LW, h / LH);
+      slides[slideIndex].render(t);
+      ctx.restore();
+    }
+    rafId = requestAnimationFrame(loop);
+  }
+
+  document.getElementById('prev').addEventListener('click', () => go(slideIndex - 1));
+  document.getElementById('next').addEventListener('click', () => go(slideIndex + 1));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') go(slideIndex + 1);
+    if (e.key === 'ArrowLeft') go(slideIndex - 1);
+  });
+  window.addEventListener('resize', () => { resizeCanvases(); });
+
+  buildMain();
+  go(0);
+  resizeCanvases();
+  go(slideIndex);
+  requestAnimationFrame(loop);
+})();
+  </script>
+</body>
+</html>

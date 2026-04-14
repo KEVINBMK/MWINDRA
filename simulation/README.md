@@ -31,9 +31,10 @@ Le serveur écoute sur **`http://0.0.0.0:8000`** (toutes les interfaces).
 2. **Téléphone A (bracelet)** : `http://192.168.1.20:8000/bracelet`  
 3. **Téléphone B (superviseur)** : `http://192.168.1.20:8000/superviseur`  
 4. **Vue 3D (option)** : `http://192.168.1.20:8000/simulation3d`  
-5. **Présentation jury (scénarios 2D)** : `http://192.168.1.20:8000/presentation-jury`  
-6. **Simulation « jeu » 2D** (galerie + zones) : `http://192.168.1.20:8000/simulation2d`  
-7. Page d’accueil : `http://192.168.1.20:8000/`
+5. **Présentation jury (Mermaid)** : `http://192.168.1.20:8000/presentation-jury`  
+6. **Scénarios animés (pédagogie jury)** : `http://192.168.1.20:8000/scenarios-animes`  
+7. **Simulation « jeu » 2D** (galerie + zones) : `http://192.168.1.20:8000/simulation2d`  
+8. Page d’accueil : `http://192.168.1.20:8000/`
 
 Sous Windows, autoriser **Python** dans le pare-feu pour le port **8000** (privé) si les téléphones ne chargent pas la page.
 
